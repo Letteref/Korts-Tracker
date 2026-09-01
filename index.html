@@ -33,70 +33,32 @@
         </div>
     </div>
 
-    <!-- ==================== AUTH SCREENS ==================== -->
+    <!-- ==================== WELCOME SCREEN ==================== -->
     <div id="screen-auth" class="screen">
-        <div class="auth-container">
-            <div class="auth-logo">
-                <i data-lucide="circle-dot" class="auth-icon"></i>
-                <h1>Korts</h1>
-                <p>No ref. No lies. Just Korts.</p>
-            </div>
-
-            <!-- Login Form -->
-            <div id="auth-login" class="auth-form-card">
-                <h2>Welcome Back</h2>
-                <form id="form-login">
-                    <div class="form-group">
-                        <label for="login-username">Username</label>
-                        <input type="text" id="login-username" placeholder="Enter username" required>
+        <div class="welcome-container">
+            <div class="welcome-card">
+                <div class="welcome-icon-wrap">
+                    <div class="welcome-icon">
+                        <i data-lucide="circle-dot"></i>
                     </div>
-                    <div class="form-group">
-                        <label for="login-password">Password</label>
-                        <input type="password" id="login-password" placeholder="Enter password" required>
+                </div>
+                <h1 class="welcome-title">Korts</h1>
+                <p class="welcome-tagline">No ref. No lies. Just Korts.</p>
+                <div class="welcome-features">
+                    <div class="welcome-feature">
+                        <span>🎾</span> Tennis & Padel
                     </div>
-                    <div class="form-check">
-                        <input type="checkbox" id="login-remember">
-                        <label for="login-remember">Remember me</label>
+                    <div class="welcome-feature">
+                        <span>🏆</span> Tournaments
                     </div>
-                    <button type="submit" class="btn btn-primary btn-full">
-                        <i data-lucide="log-in"></i> Login
-                    </button>
-                </form>
-                <p class="auth-switch">Don't have an account? <a href="#" id="goto-register">Register</a></p>
-                <p style="text-align:center;margin-top:12px;font-size:0.75rem;color:var(--text-muted);background:var(--bg-input);padding:8px;border-radius:var(--radius-xs)">
-                    🔑 Default admin: <strong>admin</strong> / <strong>admin123</strong>
-                </p>
-            </div>
-
-            <!-- Register Form -->
-            <div id="auth-register" class="auth-form-card hidden">
-                <h2>Create Account</h2>
-                <form id="form-register">
-                    <div class="form-group">
-                        <label for="reg-username">Username</label>
-                        <input type="text" id="reg-username" placeholder="Choose a username" required minlength="3">
+                    <div class="welcome-feature">
+                        <span>👥</span> Group Play
                     </div>
-                    <div class="form-group">
-                        <label for="reg-displayname">Display Name</label>
-                        <input type="text" id="reg-displayname" placeholder="Your display name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="reg-email">Email (optional)</label>
-                        <input type="email" id="reg-email" placeholder="your@email.com">
-                    </div>
-                    <div class="form-group">
-                        <label for="reg-password">Password</label>
-                        <input type="password" id="reg-password" placeholder="Min 4 characters" required minlength="4">
-                    </div>
-                    <div class="form-group">
-                        <label for="reg-password2">Confirm Password</label>
-                        <input type="password" id="reg-password2" placeholder="Repeat password" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-full">
-                        <i data-lucide="user-plus"></i> Register
-                    </button>
-                </form>
-                <p class="auth-switch">Already have an account? <a href="#" id="goto-login">Login</a></p>
+                </div>
+                <button class="btn btn-primary btn-lg btn-full welcome-btn" id="btn-welcome-start">
+                    <i data-lucide="play"></i> Start Scoring
+                </button>
+                <p class="welcome-note">Your data is saved locally on this device</p>
             </div>
         </div>
     </div>

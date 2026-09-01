@@ -1861,54 +1861,46 @@ const UI = {
     },
 
     updateUserUI() {
-        const user = Auth.currentUser;
-        if (!user) return;
-
+        // No auth — show default player avatar
         const avatar = document.getElementById('user-avatar');
         if (avatar) {
-            avatar.textContent = Utils.getInitials(user.displayName);
-            avatar.style.background = Utils.getAvatarColor(user.displayName);
+            avatar.textContent = 'K';
+            avatar.style.background = Utils.getAvatarColor('Korts');
         }
 
-        document.getElementById('dropdown-displayname').textContent = user.displayName;
-        document.getElementById('dropdown-role').textContent = user.role;
-        document.getElementById('dropdown-role').className = `badge badge-${user.role}`;
+        document.getElementById('dropdown-displayname').textContent = 'Player';
+        document.getElementById('dropdown-role').textContent = 'player';
+        document.getElementById('dropdown-role').className = 'badge badge-member';
 
+        // Hide admin button (no auth)
         const adminBtn = document.getElementById('dropdown-admin');
-        if (adminBtn) {
-            adminBtn.classList.toggle('hidden', !Auth.isAdmin());
-        }
+        if (adminBtn) adminBtn.classList.add('hidden');
     },
 
     // ===== DASHBOARD =====
     renderDashboard() {
-        const user = Auth.currentUser;
-        if (!user) return;
-
         // Hero greeting
-        document.getElementById('dashboard-greeting').textContent = user.displayName;
+        document.getElementById('dashboard-greeting').textContent = 'Player';
 
         // Hero avatar
         const heroAvatar = document.getElementById('dash-hero-avatar');
         if (heroAvatar) {
-            heroAvatar.textContent = Utils.getInitials(user.displayName);
-            heroAvatar.style.background = Utils.getAvatarColor(user.displayName);
+            heroAvatar.textContent = 'K';
+            heroAvatar.style.background = Utils.getAvatarColor('Korts');
         }
 
-        // Stats
-        const matches = Store.getMatches().filter(m => m.userId === user.id);
-        const tournaments = Store.getTournaments().filter(t => t.userId === user.id);
+        // Stats — all data (no user filter)
+        const matches = Store.getMatches();
+        const tournaments = Store.getTournaments();
         const players = Store.getPlayers();
 
         document.getElementById('stat-matches-played').textContent = matches.length;
         document.getElementById('stat-tournaments-won').textContent =
-            tournaments.filter(t => t.champion?.id === user.id).length;
+            tournaments.filter(t => t.champion).length;
         document.getElementById('stat-players-count').textContent = players.length;
 
         // Club card
-        const clubs = Store.getClubs().filter(c =>
-            c.members?.some(m => m.userId === user.id)
-        );
+        const clubs = Store.getClubs();
         const clubCard = document.getElementById('dashboard-club-card');
         if (clubs.length > 0) {
             clubCard.classList.remove('hidden');
@@ -2980,66 +2972,18 @@ const UI = {
 const Events = {
     init() {
         // Auth forms
-        document.getElementById('form-login')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            try {
-                await Auth.login(
-                    document.getElementById('login-username').value,
-                    document.getElementById('login-password').value
-                );
-                if (document.getElementById('login-remember').checked) {
-                    Store.set('rememberMe', true);
-                }
-                Auth.initDefaultPlayers();
-                UI.updateUserUI();
-                Router.navigate('dashboard');
-                Toast.show('Welcome back!', 'success');
-            } catch (err) {
-                Toast.show(err.message, 'error');
-            }
+        // Welcome screen — Start button
+        document.getElementById('btn-welcome-start')?.addEventListener('click', () => {
+            Auth.initDefaultPlayers();
+            UI.updateUserUI();
+            Router.navigate('dashboard');
         });
 
-        document.getElementById('form-register')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const pw = document.getElementById('reg-password').value;
-            const pw2 = document.getElementById('reg-password2').value;
-            if (pw !== pw2) { Toast.show('Passwords do not match', 'error'); return; }
-
-            try {
-                await Auth.register(
-                    document.getElementById('reg-username').value,
-                    pw,
-                    document.getElementById('reg-displayname').value,
-                    document.getElementById('reg-email').value
-                );
-                Auth.initDefaultPlayers();
-                UI.updateUserUI();
-                Router.navigate('dashboard');
-                Toast.show('Account created! You are the admin.', 'success');
-            } catch (err) {
-                Toast.show(err.message, 'error');
-            }
-        });
-
-        // Auth switching
-        document.getElementById('goto-register')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            document.getElementById('auth-login').classList.add('hidden');
-            document.getElementById('auth-register').classList.remove('hidden');
-        });
-
-        document.getElementById('goto-login')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            document.getElementById('auth-register').classList.add('hidden');
-            document.getElementById('auth-login').classList.remove('hidden');
-        });
-
-        // Logout
+        // Logout — back to welcome screen
         document.getElementById('dropdown-logout')?.addEventListener('click', (e) => {
             e.preventDefault();
-            Auth.logout();
             Router.showScreen('auth');
-            Toast.show('Logged out', 'info');
+            Toast.show('See you next time!', 'info');
         });
 
         // User dropdown
@@ -3481,16 +3425,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialize Lucide icons
     lucide.createIcons();
 
-    // Initialize auth
-    const user = await Auth.init();
-
-    if (user) {
-        Auth.initDefaultPlayers();
-        UI.updateUserUI();
-        Router.navigate('dashboard');
-    } else {
-        Router.showScreen('auth');
-    }
+    // Always show welcome screen — no auth required
+    Auth.initDefaultPlayers();
+    Router.showScreen('auth');
 
     // Initialize all event handlers
     Events.init();
