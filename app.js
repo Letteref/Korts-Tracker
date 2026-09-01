@@ -3497,4 +3497,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Handle admin route on load
     Router.handleRoute();
+
+    // Register Service Worker for PWA
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js').catch(() => {
+            // Service worker registration failed — app still works
+        });
+    }
 });
