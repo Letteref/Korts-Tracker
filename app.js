@@ -253,6 +253,110 @@ const Auth = {
 };
 
 // ============================================================
+// SOUND & HAPTIC FEEDBACK
+// ============================================================
+const SFX = {
+    ctx: null,
+
+    getCtx() {
+        if (!this.ctx) {
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        return this.ctx;
+    },
+
+    // Resume context on first user interaction (required by browsers)
+    resume() {
+        if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume();
+        }
+    },
+
+    // Short click — FAB toggle
+    click() {
+        try {
+            const ctx = this.getCtx();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.frequency.setValueAtTime(800, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.05);
+            gain.gain.setValueAtTime(0.15, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.08);
+        } catch (e) {}
+    },
+
+    // Pop sound — popup open
+    pop() {
+        try {
+            const ctx = this.getCtx();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1400, ctx.currentTime + 0.06);
+            osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.12);
+            gain.gain.setValueAtTime(0.18, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.12);
+        } catch (e) {}
+    },
+
+    // Soft close
+    close() {
+        try {
+            const ctx = this.getCtx();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.1);
+        } catch (e) {}
+    },
+
+    // Success ding — option select
+    select() {
+        try {
+            const ctx = this.getCtx();
+            const t = ctx.currentTime;
+            // Two-tone ding
+            [880, 1320].forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, t + i * 0.08);
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.2, t + i * 0.08);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.08 + 0.15);
+                osc.start(t + i * 0.08);
+                osc.stop(t + i * 0.08 + 0.15);
+            });
+        } catch (e) {}
+    },
+
+    // Haptic feedback
+    haptic(ms) {
+        try {
+            if (navigator.vibrate) navigator.vibrate(ms);
+        } catch (e) {}
+    }
+};
+
+// ============================================================
 // ROUTER
 // ============================================================
 const Router = {
@@ -3373,12 +3477,17 @@ const Events = {
         const qaOverlay = document.getElementById('quick-action-overlay');
         if (qaBtn) {
             qaBtn.addEventListener('click', () => {
+                SFX.resume();
                 const isOpen = qaPopup.classList.contains('visible');
                 if (isOpen) {
+                    SFX.close();
+                    SFX.haptic(10);
                     qaPopup.classList.remove('visible');
                     qaOverlay.classList.remove('visible');
                     qaBtn.classList.remove('open');
                 } else {
+                    SFX.pop();
+                    SFX.haptic(15);
                     qaPopup.classList.add('visible');
                     qaOverlay.classList.add('visible');
                     qaBtn.classList.add('open');
@@ -3387,6 +3496,8 @@ const Events = {
         }
         if (qaOverlay) {
             qaOverlay.addEventListener('click', () => {
+                SFX.close();
+                SFX.haptic(10);
                 qaPopup.classList.remove('visible');
                 qaOverlay.classList.remove('visible');
                 qaBtn.classList.remove('open');
@@ -3394,6 +3505,8 @@ const Events = {
         }
         document.querySelectorAll('.qap-option').forEach(opt => {
             opt.addEventListener('click', () => {
+                SFX.select();
+                SFX.haptic(20);
                 qaPopup.classList.remove('visible');
                 qaOverlay.classList.remove('visible');
                 qaBtn.classList.remove('open');
