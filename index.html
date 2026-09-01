@@ -1240,16 +1240,42 @@
                 <div class="screen-header">
                     <h2><i data-lucide="user"></i> Profile</h2>
                 </div>
-                <div class="profile-card" id="profile-card"></div>
-                <div class="settings-section">
-                    <h3>Data Management</h3>
-                    <button class="btn btn-ghost btn-full" id="btn-export-data">
-                        <i data-lucide="download"></i> Export All Data (JSON)
-                    </button>
-                    <label class="btn btn-ghost btn-full mt-1">
-                        <i data-lucide="upload"></i> Import Data (JSON)
-                        <input type="file" id="btn-import-data" accept=".json" hidden>
-                    </label>
+
+                <!-- Profile Card -->
+                <div class="profile-hero" id="profile-hero"></div>
+
+                <!-- Change Username -->
+                <div class="profile-section">
+                    <h3 class="profile-section-title">Username</h3>
+                    <div class="profile-input-row">
+                        <input type="text" id="profile-username-input" class="onb-input" placeholder="Your name">
+                        <button class="onb-add-btn" id="btn-save-username">
+                            <i data-lucide="check"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Personal Stats -->
+                <div class="profile-section">
+                    <h3 class="profile-section-title">Your Stats</h3>
+                    <div class="profile-stats-grid" id="profile-stats-grid"></div>
+                </div>
+
+                <!-- Data Management -->
+                <div class="profile-section">
+                    <h3 class="profile-section-title">Data Management</h3>
+                    <div class="profile-actions">
+                        <button class="btn btn-ghost btn-full" id="btn-export-data">
+                            <i data-lucide="download"></i> Export All Data
+                        </button>
+                        <label class="btn btn-ghost btn-full">
+                            <i data-lucide="upload"></i> Import Data
+                            <input type="file" id="btn-import-data" accept=".json" hidden>
+                        </label>
+                        <button class="btn btn-danger btn-full" id="btn-reset-app">
+                            <i data-lucide="trash-2"></i> Reset All Data
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

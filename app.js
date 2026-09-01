@@ -3163,32 +3163,88 @@ const UI = {
 
     // ===== PROFILE =====
     renderProfile() {
-        const user = Auth.currentUser;
-        if (!user) return;
+        const myName = Store._getSingle('myName') || 'Player';
 
-        const stats = Statistics.getPlayerStats(user.id);
-        const card = document.getElementById('profile-card');
-        card.innerHTML = `
-            <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
-                <div class="avatar-circle avatar-lg" style="background:${Utils.getAvatarColor(user.displayName)}">${Utils.getInitials(user.displayName)}</div>
+        // Hero card
+        const hero = document.getElementById('profile-hero');
+        hero.innerHTML = `
+            <div class="profile-avatar-wrap">
+                <div class="avatar-circle avatar-lg" style="background:${Utils.getAvatarColor(myName)}">${Utils.getInitials(myName)}</div>
+            </div>
+            <h2 class="profile-name">${Utils.escapeHtml(myName)}</h2>
+            <span class="badge badge-member">Player</span>
+        `;
+
+        // Username input
+        const nameInput = document.getElementById('profile-username-input');
+        if (nameInput) nameInput.value = myName;
+
+        // Stats
+        const matches = Store.getMatches();
+        const myMatches = matches.filter(m =>
+            m.players?.some(p => p.name === myName)
+        );
+        const wins = myMatches.filter(m => m.winnerName === myName).length;
+        const winRate = myMatches.length > 0 ? Math.round((wins / myMatches.length) * 100) : 0;
+        const totalGames = myMatches.reduce((sum, m) => {
+            if (!m.stats) return sum;
+            const idx = m.players.findIndex(p => p.name === myName);
+            const key = idx === 0 ? 'p1' : 'p2';
+            return sum + (m.stats.gamesWon?.[key] || 0);
+        }, 0);
+        const totalAces = myMatches.reduce((sum, m) => {
+            if (!m.stats) return sum;
+            const idx = m.players.findIndex(p => p.name === myName);
+            const key = idx === 0 ? 'p1' : 'p2';
+            return sum + (m.stats.aces?.[key] || 0);
+        }, 0);
+
+        const statsGrid = document.getElementById('profile-stats-grid');
+        statsGrid.innerHTML = `
+            <div class="stat-mini-card">
+                <i data-lucide="swords"></i>
                 <div>
-                    <h3>${Utils.escapeHtml(user.displayName)}</h3>
-                    <p style="color:var(--text-secondary)">@${Utils.escapeHtml(user.username)}</p>
-                    <span class="badge badge-${user.role}">${user.role}</span>
+                    <span class="stat-value">${myMatches.length}</span>
+                    <span class="stat-label">Matches</span>
                 </div>
             </div>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
-                <div class="stat-mini-card">
-                    <div><span class="stat-value">${stats.matchesPlayed}</span><span class="stat-label">Matches</span></div>
+            <div class="stat-mini-card">
+                <i data-lucide="trophy"></i>
+                <div>
+                    <span class="stat-value">${wins}</span>
+                    <span class="stat-label">Wins</span>
                 </div>
-                <div class="stat-mini-card">
-                    <div><span class="stat-value">${stats.wins}</span><span class="stat-label">Wins</span></div>
+            </div>
+            <div class="stat-mini-card">
+                <i data-lucide="percent"></i>
+                <div>
+                    <span class="stat-value">${winRate}%</span>
+                    <span class="stat-label">Win Rate</span>
                 </div>
-                <div class="stat-mini-card">
-                    <div><span class="stat-value">${stats.winRate}%</span><span class="stat-label">Win Rate</span></div>
+            </div>
+            <div class="stat-mini-card">
+                <i data-lucide="target"></i>
+                <div>
+                    <span class="stat-value">${totalGames}</span>
+                    <span class="stat-label">Games Won</span>
+                </div>
+            </div>
+            <div class="stat-mini-card">
+                <i data-lucide="zap"></i>
+                <div>
+                    <span class="stat-value">${totalAces}</span>
+                    <span class="stat-label">Aces</span>
+                </div>
+            </div>
+            <div class="stat-mini-card">
+                <i data-lucide="users"></i>
+                <div>
+                    <span class="stat-value">${Store.getPlayers().length}</span>
+                    <span class="stat-label">Players</span>
                 </div>
             </div>
         `;
+        lucide.createIcons();
     },
 
     // ===== DATA IMPORT/EXPORT =====
@@ -3630,6 +3686,35 @@ const Events = {
         document.getElementById('dropdown-profile')?.addEventListener('click', (e) => {
             e.preventDefault();
             Router.navigate('profile');
+        });
+
+        // Profile — change username
+        document.getElementById('btn-save-username')?.addEventListener('click', () => {
+            const input = document.getElementById('profile-username-input');
+            const newName = input?.value?.trim();
+            if (!newName) { Toast.show('Please enter a name', 'error'); return; }
+            if (newName === Store._getSingle('myName')) { Toast.show('Same name — no changes', 'info'); return; }
+            // Update in players list
+            const players = Store.getPlayers();
+            const oldName = Store._getSingle('myName');
+            const mePlayer = players.find(p => p.name === oldName);
+            if (mePlayer) mePlayer.name = newName;
+            Store.savePlayers(players);
+            // Update myName
+            Store._set('myName', newName);
+            // Update all UI
+            UI.updateUserUI();
+            UI.renderProfile();
+            Toast.show(`Name changed to ${newName}`, 'success');
+        });
+
+        // Profile — reset app
+        document.getElementById('btn-reset-app')?.addEventListener('click', () => {
+            Confirm.show('Reset All Data?', 'This will delete all matches, players, tournaments, and settings. This cannot be undone!', () => {
+                Object.keys(localStorage).filter(k => k.startsWith('st_')).forEach(k => localStorage.removeItem(k));
+                Toast.show('All data cleared', 'success');
+                setTimeout(() => location.reload(), 1000);
+            }, true);
         });
 
         // Data export/import
