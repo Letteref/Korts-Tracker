@@ -146,8 +146,29 @@ const Auth = {
     currentUser: null,
 
     async init() {
+        // Create default admin if no users exist
+        await this.createDefaultAdmin();
         this.currentUser = Store.getCurrentUser();
         return this.currentUser;
+    },
+
+    async createDefaultAdmin() {
+        const users = Store.getUsers();
+        if (users.length > 0) return; // Users already exist, skip
+
+        const hashed = await Utils.hashPassword('admin123');
+        const admin = {
+            id: 'default-admin',
+            username: 'admin',
+            password: hashed,
+            displayName: 'Admin',
+            email: 'admin@korts.app',
+            role: 'admin',
+            active: true,
+            createdAt: new Date().toISOString()
+        };
+        users.push(admin);
+        Store.saveUsers(users);
     },
 
     async register(username, password, displayName, email) {
