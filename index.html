@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Korts — Tennis & Padel Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- ==================== TOAST NOTIFICATIONS ==================== -->
+    <div id="toast-container"></div>
+
+    <!-- ==================== CONFIRM DIALOG ==================== -->
+    <div id="confirm-modal" class="modal-overlay hidden">
+        <div class="modal-card confirm-card">
+            <div class="modal-icon" id="confirm-icon"></div>
+            <h3 id="confirm-title"></h3>
+            <p id="confirm-message"></p>
+            <div class="modal-actions">
+                <button class="btn btn-ghost" id="confirm-cancel">Cancel</button>
+                <button class="btn btn-danger" id="confirm-ok">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== AUTH SCREENS ==================== -->
+    <div id="screen-auth" class="screen">
+        <div class="auth-container">
+            <div class="auth-logo">
+                <i data-lucide="circle-dot" class="auth-icon"></i>
+                <h1>Korts</h1>
+                <p>No ref. No lies. Just Korts.</p>
+            </div>
+
+            <!-- Login Form -->
+            <div id="auth-login" class="auth-form-card">
+                <h2>Welcome Back</h2>
+                <form id="form-login">
+                    <div class="form-group">
+                        <label for="login-username">Username</label>
+                        <input type="text" id="login-username" placeholder="Enter username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" placeholder="Enter password" required>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" id="login-remember">
+                        <label for="login-remember">Remember me</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i data-lucide="log-in"></i> Login
+                    </button>
+                </form>
+                <p class="auth-switch">Don't have an account? <a href="#" id="goto-register">Register</a></p>
+            </div>
+
+            <!-- Register Form -->
+            <div id="auth-register" class="auth-form-card hidden">
+                <h2>Create Account</h2>
+                <form id="form-register">
+                    <div class="form-group">
+                        <label for="reg-username">Username</label>
+                        <input type="text" id="reg-username" placeholder="Choose a username" required minlength="3">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-displayname">Display Name</label>
+                        <input type="text" id="reg-displayname" placeholder="Your display name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-email">Email (optional)</label>
+                        <input type="email" id="reg-email" placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-password">Password</label>
+                        <input type="password" id="reg-password" placeholder="Min 4 characters" required minlength="4">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-password2">Confirm Password</label>
+                        <input type="password" id="reg-password2" placeholder="Repeat password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i data-lucide="user-plus"></i> Register
+                    </button>
+                </form>
+                <p class="auth-switch">Already have an account? <a href="#" id="goto-login">Login</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN APP CONTAINER ==================== -->
+    <div id="app-container" class="hidden">
+
+        <!-- ===== TOP HEADER BAR ===== -->
+        <header id="app-header" class="app-header">
+            <div class="header-left">
+                <button class="btn-icon" id="btn-menu-toggle">
+                    <i data-lucide="menu"></i>
+                </button>
+                <div class="header-brand" id="btn-goto-dashboard">
+                    <i data-lucide="circle-dot"></i>
+                    <span>Korts</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="sport-toggle" id="sport-toggle">
+                    <button class="sport-btn active" data-sport="tennis">
+                        <span class="sport-emoji">🎾</span> Tennis
+                    </button>
+                    <button class="sport-btn" data-sport="padel">
+                        <span class="sport-emoji">🏓</span> Padel
+                    </button>
+                </div>
+                <div class="user-menu" id="user-menu">
+                    <div class="avatar-circle" id="user-avatar"></div>
+                    <div class="user-dropdown hidden" id="user-dropdown">
+                        <div class="dropdown-header">
+                            <strong id="dropdown-displayname"></strong>
+                            <span class="badge" id="dropdown-role"></span>
+                        </div>
+                        <a href="#" id="dropdown-profile"><i data-lucide="user"></i> Profile</a>
+                        <a href="#" id="dropdown-settings"><i data-lucide="settings"></i> Settings</a>
+                        <a href="#" id="dropdown-admin" class="hidden"><i data-lucide="shield"></i> Admin Dashboard</a>
+                        <hr>
+                        <a href="#" id="dropdown-logout"><i data-lucide="log-out"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ===== SCREEN: DASHBOARD ===== -->
+        <div id="screen-dashboard" class="main-screen">
+            <div class="dashboard-container">
+                <div class="dashboard-hero">
+                    <h2 id="dashboard-greeting">Welcome back!</h2>
+                    <p class="dashboard-subtitle">Ready to play?</p>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="quick-stats" id="dashboard-quick-stats">
+                    <div class="stat-mini-card">
+                        <i data-lucide="trophy"></i>
+                        <div>
+                            <span class="stat-value" id="stat-matches-played">0</span>
+                            <span class="stat-label">Matches</span>
+                        </div>
+                    </div>
+                    <div class="stat-mini-card">
+                        <i data-lucide="medal"></i>
+                        <div>
+                            <span class="stat-value" id="stat-tournaments-won">0</span>
+                            <span class="stat-label">Tournaments Won</span>
+                        </div>
+                    </div>
+                    <div class="stat-mini-card">
+                        <i data-lucide="users"></i>
+                        <div>
+                            <span class="stat-value" id="stat-players-count">0</span>
+                            <span class="stat-label">Players</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Club Card -->
+                <div id="dashboard-club-card" class="club-overview-card hidden">
+                    <div class="club-card-header">
+                        <div class="club-avatar" id="club-card-avatar"></div>
+                        <div>
+                            <h3 id="club-card-name">Club Name</h3>
+                            <p id="club-card-members">0 members</p>
+                        </div>
+                    </div>
+                    <div class="club-card-actions">
+                        <button class="btn btn-primary btn-sm" id="btn-club-quick-match">
+                            <i data-lucide="play"></i> Start Club Match
+                        </button>
+                        <button class="btn btn-ghost btn-sm" id="btn-club-dashboard">
+                            <i data-lucide="arrow-right"></i> View Club
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Resume Cards -->
+                <div id="dashboard-resume" class="hidden">
+                    <h3 class="section-title"><i data-lucide="rotate-ccw"></i> Resume</h3>
+                    <div id="resume-cards" class="resume-cards"></div>
+                </div>
+
+                <!-- Mode Cards -->
+                <h3 class="section-title">Start Playing</h3>
+                <div class="mode-cards">
+                    <div class="mode-card" id="mode-new-match">
+                        <div class="mode-card-icon"><i data-lucide="swords"></i></div>
+                        <h3>New Match</h3>
+                        <p>Quick singles or doubles match</p>
+                    </div>
+                    <div class="mode-card" id="mode-tournament">
+                        <div class="mode-card-icon"><i data-lucide="trophy"></i></div>
+                        <h3>Tournament</h3>
+                        <p>Set up a bracket competition</p>
+                    </div>
+                    <div class="mode-card" id="mode-group-play">
+                        <div class="mode-card-icon"><i data-lucide="users"></i></div>
+                        <h3>Group Play</h3>
+                        <p>King of the court rotation</p>
+                    </div>
+                </div>
+
+                <!-- Last Match -->
+                <div id="dashboard-last-match" class="hidden">
+                    <h3 class="section-title"><i data-lucide="clock"></i> Last Match</h3>
+                    <div id="last-match-card" class="last-match-card"></div>
+                </div>
+
+                <!-- Quick Nav -->
+                <div class="quick-nav">
+                    <button class="quick-nav-btn" id="nav-players">
+                        <i data-lucide="user-cog"></i> Players
+                    </button>
+                    <button class="quick-nav-btn" id="nav-history">
+                        <i data-lucide="clock"></i> History
+                    </button>
+                    <button class="quick-nav-btn" id="nav-clubs">
+                        <i data-lucide="building-2"></i> Clubs
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SCREEN: ADMIN DASHBOARD ===== -->
+        <div id="screen-admin" class="main-screen hidden">
+            <div class="admin-container">
+                <div class="admin-header">
+                    <h2><i data-lucide="shield"></i> Admin Dashboard</h2>
+                    <button class="btn btn-ghost btn-sm" id="btn-admin-back">
+                        <i data-lucide="arrow-left"></i> Back to App
+                    </button>
+                </div>
+
+                <!-- 403 Page -->
+                <div id="admin-403" class="admin-403 hidden">
+                    <i data-lucide="shield-alert" class="icon-xl"></i>
+                    <h2>403 — Access Denied</h2>
+                    <p>You don't have admin privileges to access this page.</p>
+                    <button class="btn btn-primary" id="btn-admin-403-home">
+                        <i data-lucide="home"></i> Go to Home
+                    </button>
+                </div>
+
+                <!-- Admin Content -->
+                <div id="admin-content">
+                    <!-- KPI Cards -->
+                    <div class="kpi-grid" id="admin-kpis">
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background:rgba(34,197,94,0.15);color:#22c55e"><i data-lucide="users"></i></div>
+                            <div class="kpi-info">
+                                <span class="kpi-value" id="kpi-total-users">0</span>
+                                <span class="kpi-label">Total Users</span>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b"><i data-lucide="trophy"></i></div>
+                            <div class="kpi-info">
+                                <span class="kpi-value" id="kpi-total-matches">0</span>
+                                <span class="kpi-label">Total Matches</span>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background:rgba(59,130,246,0.15);color:#3b82f6"><i data-lucide="pie-chart"></i></div>
+                            <div class="kpi-info">
+                                <span class="kpi-value" id="kpi-tennis-padel-ratio">0% / 0%</span>
+                                <span class="kpi-label">Tennis vs Padel</span>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon pulse-icon" style="background:rgba(239,68,68,0.15);color:#ef4444"><i data-lucide="radio"></i></div>
+                            <div class="kpi-info">
+                                <span class="kpi-value" id="kpi-ongoing-matches">0</span>
+                                <span class="kpi-label">Live Matches</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="charts-grid">
+                        <div class="chart-card">
+                            <h3>Match Distribution</h3>
+                            <canvas id="chart-sport-distribution"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3>Activity Trend</h3>
+                                <div class="chart-toggle">
+                                    <button class="btn btn-xs active" data-chart-period="daily">Daily</button>
+                                    <button class="btn btn-xs" data-chart-period="weekly">Weekly</button>
+                                </div>
+                            </div>
+                            <canvas id="chart-activity"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Master Data Tables -->
+                    <div class="admin-tables">
+                        <div class="admin-table-tabs">
+                            <button class="tab-btn active" data-table-tab="users">
+                                <i data-lucide="users"></i> User Management
+                            </button>
+                            <button class="tab-btn" data-table-tab="matches">
+                                <i data-lucide="trophy"></i> Match History Master
+                            </button>
+                        </div>
+
+                        <!-- User Management Table -->
+                        <div id="table-users" class="admin-table-panel">
+                            <div class="table-toolbar">
+                                <div class="search-box">
+                                    <i data-lucide="search"></i>
+                                    <input type="text" id="search-users" placeholder="Search users...">
+                                </div>
+                                <div class="filter-group">
+                                    <select id="filter-users-status">
+                                        <option value="">All Status</option>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                    <select id="filter-users-role">
+                                        <option value="">All Roles</option>
+                                        <option value="admin">Admin</option>
+                                        <option value="manager">Manager</option>
+                                        <option value="member">Member</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="table-wrapper">
+                                <table class="data-table" id="users-table">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Email</th>
+                                            <th>Joined</th>
+                                            <th>Matches</th>
+                                            <th>Win Rate</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="users-table-body"></tbody>
+                                </table>
+                            </div>
+                            <div class="table-pagination" id="users-pagination"></div>
+                        </div>
+
+                        <!-- Match History Master Table -->
+                        <div id="table-matches" class="admin-table-panel hidden">
+                            <div class="table-toolbar">
+                                <div class="search-box">
+                                    <i data-lucide="search"></i>
+                                    <input type="text" id="search-matches" placeholder="Search matches...">
+                                </div>
+                                <div class="filter-group">
+                                    <select id="filter-matches-sport">
+                                        <option value="">All Sports</option>
+                                        <option value="tennis">Tennis</option>
+                                        <option value="padel">Padel</option>
+                                    </select>
+                                    <select id="filter-matches-mode">
+                                        <option value="">All Modes</option>
+                                        <option value="singles">Singles</option>
+                                        <option value="doubles">Doubles</option>
+                                    </select>
+                                    <input type="date" id="filter-matches-date">
+                                </div>
+                            </div>
+                            <div class="table-wrapper">
+                                <table class="data-table" id="matches-admin-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Match ID</th>
+                                            <th>Sport</th>
+                                            <th>Mode</th>
+                                            <th>Players</th>
+                                            <th>Score</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="matches-admin-table-body"></tbody>
+                                </table>
+                            </div>
+                            <div class="table-pagination" id="matches-pagination"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SCREEN: PLAYERS ===== -->
+        <div id="screen-players" class="main-screen hidden">
+            <div class="players-container">
+                <div class="screen-header">
+                    <h2><i data-lucide="user-cog"></i> Players</h2>
+                    <button class="btn btn-primary btn-sm" id="btn-add-player">
+                        <i data-lucide="user-plus"></i> Add Player
+                    </button>
+                </div>
+                <div class="search-box">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="search-players" placeholder="Search players...">
+                </div>
+                <div class="player-roster" id="player-roster"></div>
+            </div>
+        </div>
+
+        <!-- ===== PLAYER EDIT MODAL ===== -->
+        <div id="modal-player" class="modal-overlay hidden">
+            <div class="modal-card modal-lg">
+                <div class="modal-header">
+                    <h3 id="modal-player-title">Add Player</h3>
+                    <button class="btn-icon modal-close" id="close-modal-player"><i data-lucide="x"></i></button>
+                </div>
+                <form id="form-player">
+                    <input type="hidden" id="player-edit-id">
+                    <div class="form-group">
+                        <label for="player-name">Player Name</label>
+                        <input type="text" id="player-name" placeholder="Enter player name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="player-skill">Skill Level</label>
+                        <select id="player-skill">
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate" selected>Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                            <option value="pro">Pro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="player-notes">Notes</label>
+                        <textarea id="player-notes" placeholder="e.g. left-handed, strong serve..." rows="3"></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-ghost" id="cancel-modal-player">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="save-player-btn">Save Player</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ===== SCREEN: NEW MATCH SETUP ===== -->
+        <div id="screen-match-setup" class="main-screen hidden">
+            <div class="setup-container">
+                <div class="screen-header">
+                    <h2><i data-lucide="swords"></i> New Match</h2>
+                </div>
+                <div class="setup-form">
+                    <div class="form-group">
+                        <label>Sport</label>
+                        <div class="sport-selector">
+                            <button class="sport-select-btn active" data-setup-sport="tennis">
+                                <span>🎾</span> Tennis
+                            </button>
+                            <button class="sport-select-btn" data-setup-sport="padel">
+                                <span>🏓</span> Padel
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Mode</label>
+                        <div class="sport-selector">
+                            <button class="sport-select-btn active" data-setup-mode="singles">Singles (1v1)</button>
+                            <button class="sport-select-btn" data-setup-mode="doubles">Doubles (2v2)</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Play As</label>
+                        <div class="sport-selector">
+                            <button class="sport-select-btn active" data-setup-origin="personal">Personal</button>
+                            <button class="sport-select-btn" data-setup-origin="club">Club</button>
+                        </div>
+                    </div>
+                    <div id="club-selector-container" class="form-group hidden">
+                        <label>Select Club</label>
+                        <select id="match-club-select"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Best Of</label>
+                        <div class="sport-selector">
+                            <button class="sport-select-btn active" data-setup-sets="3">Best of 3</button>
+                            <button class="sport-select-btn" data-setup-sets="5">Best of 5</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>First Server</label>
+                        <div class="sport-selector" id="first-server-options">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Player Selection -->
+                    <div class="player-picks" id="match-player-picks">
+                        <div class="player-pick-card">
+                            <label>Player 1 / Team 1</label>
+                            <select id="pick-p1" class="player-select"></select>
+                            <select id="pick-p1-d2" class="player-select hidden"></select>
+                        </div>
+                        <div class="vs-badge">VS</div>
+                        <div class="player-pick-card">
+                            <label>Player 2 / Team 2</label>
+                            <select id="pick-p2" class="player-select"></select>
+                            <select id="pick-p2-d2" class="player-select hidden"></select>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary btn-lg btn-full" id="btn-start-match">
+                        <i data-lucide="play"></i> Start Match
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SCREEN: LIVE MATCH ===== -->
+        <div id="screen-match" class="main-screen hidden">
+            <div class="match-container">
+                <!-- Match Header -->
+                <div class="match-header">
+                    <div class="match-sport-badge" id="match-sport-badge">🎾 Tennis</div>
+                    <div class="match-timer" id="match-timer-display">00:00</div>
+                    <div class="match-actions-bar">
+                        <button class="btn btn-ghost btn-sm" id="btn-match-undo" title="Undo">
+                            <i data-lucide="undo-2"></i>
+                        </button>
+                        <button class="btn btn-ghost btn-sm" id="btn-match-pause" title="Pause">
+                            <i data-lucide="pause"></i>
+                        </button>
+                        <button class="btn btn-ghost btn-sm btn-danger-text" id="btn-match-retire" title="Retire">
+                            <i data-lucide="flag"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Scoreboard -->
+                <div class="scoreboard" id="scoreboard">
+                    <!-- Player 1 Side -->
+                    <div class="scoreboard-player sb-left">
+                        <div class="sb-player-info">
+                            <div class="avatar-circle sb-avatar" id="sb-p1-avatar"></div>
+                            <div class="sb-name" id="sb-p1-name">Player 1</div>
+                            <div class="sb-detail" id="sb-p1-detail"></div>
+                        </div>
+                        <div class="sb-scores">
+                            <div class="sb-sets" id="sb-p1-sets"></div>
+                            <div class="sb-game" id="sb-p1-game">0</div>
+                            <div class="sb-point" id="sb-p1-point">0</div>
+                        </div>
+                    </div>
+
+                    <!-- Server Indicator -->
+                    <div class="server-indicator">
+                        <div class="server-dot sb-left-server" id="sb-p1-server"></div>
+                    </div>
+
+                    <div class="score-divider"></div>
+
+                    <div class="server-indicator">
+                        <div class="server-dot sb-right-server" id="sb-p2-server"></div>
+                    </div>
+
+                    <!-- Player 2 Side -->
+                    <div class="scoreboard-player sb-right">
+                        <div class="sb-scores">
+                            <div class="sb-sets" id="sb-p2-sets"></div>
+                            <div class="sb-game" id="sb-p2-game">0</div>
+                            <div class="sb-point" id="sb-p2-point">0</div>
+                        </div>
+                        <div class="sb-player-info">
+                            <div class="avatar-circle sb-avatar" id="sb-p2-avatar"></div>
+                            <div class="sb-name" id="sb-p2-name">Player 2</div>
+                            <div class="sb-detail" id="sb-p2-detail"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scoring Buttons -->
+                <div class="scoring-buttons">
+                    <button class="score-btn score-btn-p1" id="btn-score-p1">
+                        <span class="score-btn-label" id="score-btn-p1-label">Point for</span>
+                        <span class="score-btn-name" id="score-btn-p1-name">Player 1</span>
+                    </button>
+                    <button class="score-btn score-btn-p2" id="btn-score-p2">
+                        <span class="score-btn-label" id="score-btn-p2-label">Point for</span>
+                        <span class="score-btn-name" id="score-btn-p2-name">Player 2</span>
+                    </button>
+                </div>
+
+                <!-- Stats Panel (Expandable) -->
+                <div class="stats-panel" id="match-stats-panel">
+                    <button class="stats-toggle" id="btn-toggle-stats">
+                        <i data-lucide="bar-chart-3"></i> Match Statistics
+                        <i data-lucide="chevron-down"></i>
+                    </button>
+                    <div class="stats-content hidden" id="match-stats-content">
+                        <div class="stats-grid">
+                            <div class="stat-row">
+                                <span class="stat-val" id="stat-p1-points">0</span>
+                                <span class="stat-name">Points Won</span>
+                                <span class="stat-val" id="stat-p2-points">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-val" id="stat-p1-games">0</span>
+                                <span class="stat-name">Games Won</span>
+                                <span class="stat-val" id="stat-p2-games">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-val" id="stat-p1-aces">0</span>
+                                <span class="stat-name">Aces</span>
+                                <span class="stat-val" id="stat-p2-aces">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-val" id="stat-p1-breaks">0</span>
+                                <span class="stat-name">Break Points</span>
+                                <span class="stat-val" id="stat-p2-breaks">0</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-ghost btn-sm" id="btn-ace-p1">🎾 Ace — Player 1</button>
+                        <button class="btn btn-ghost btn-sm" id="btn-ace-p2">🎾 Ace — Player 2</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== MATCH COMPLETE OVERLAY ===== -->
+        <div id="match-complete-overlay" class="overlay hidden">
+            <div class="overlay-card match-complete-card">
+                <div class="confetti-container" id="confetti"></div>
+                <div class="trophy-icon"><i data-lucide="trophy"></i></div>
+                <h2 id="winner-name">Winner!</h2>
+                <p class="winner-subtitle" id="winner-subtitle"></p>
+                <div class="final-score-display" id="final-score-display"></div>
+                <div class="complete-stats" id="complete-stats"></div>
+                <div class="overlay-actions">
+                    <button class="btn btn-primary" id="btn-share-match">
+                        <i data-lucide="share-2"></i> Share Stats
+                    </button>
+                    <button class="btn btn-ghost" id="btn-complete-close">
+                        <i data-lucide="home"></i> Back to Home
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SCREEN: TOURNAMENT SETUP ===== -->
+        <div id="screen-tournament-setup" class="main-screen hidden">
+            <div class="setup-container">
+                <div class="screen-header">
+                    <h2><i data-lucide="trophy"></i> Tournament Setup</h2>
+                </div>
+                <div class="setup-form">
+                    <div class="form-group">
+                        <label for="tournament-name">Tournament Name</label>
+                        <input type="text" id="tournament-name" placeholder="e.g. Friday Night Tournament" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Sport</label>
+                        <div class="sport-selector">
+                            <button class="sport-select-btn active" data-tourney-sport="tennis">🎾 Tennis</button>
+                            <button class="sport-select-btn" data-tourney-sport="padel">🏓 Padel</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Mode</label>
+                        <div class="sport-selector">
+                            <button class="sport-select-btn active" data-tourney-mode="singles">Singles</button>
+                            <button class="sport-select-btn" data-tourney-mode="doubles">Doubles</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Play As</label>
+                        <div class="sport-selector">
+                            <button class="sport-select-btn active" data-tourney-origin="personal">Personal</button>
+                            <button class="sport-select-btn" data-tourney-origin="club">Club</button>
+                        </div>
+                    </div>
+                    <div id="tourney-club-container" class="form-group hidden">
+                        <label>Select Club</label>
+                        <select id="tourney-club-select"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Bracket Format</label>
+                        <div class="sport-selector">
+                            <button class="sport-select-btn active" data-tourney-format="single-elim">Single Elimination</button>
+                            <button class="sport-select-btn" data-tourney-format="double-elim">Double Elimination</button>
+                            <button class="sport-select-btn" data-tourney-format="round-robin">Round Robin</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Best Of</label>
+                        <div class="sport-selector">
+                            <button class="sport-select-btn active" data-tourney-sets="3">Best of 3</button>
+                            <button class="sport-select-btn" data-tourney-sets="5">Best of 5</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Players (4-16)</label>
+                        <div class="tourney-player-grid" id="tourney-player-grid">
+                            <!-- Populated dynamically -->
+                        </div>
+                        <p class="form-help" id="tourney-player-count">0 players selected (need at least 4)</p>
+                    </div>
+                    <button class="btn btn-primary btn-lg btn-full" id="btn-generate-bracket">
+                        <i data-lucide="git-branch"></i> Generate Bracket
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SCREEN: TOURNAMENT BRACKET ===== -->
+        <div id="screen-tournament" class="main-screen hidden">
+            <div class="tournament-container">
+                <div class="screen-header">
+                    <h2 id="tournament-title"><i data-lucide="trophy"></i> Tournament</h2>
+                    <div class="tournament-actions">
+                        <button class="btn btn-ghost btn-sm" id="btn-tournament-save">
+                            <i data-lucide="save"></i> Save
+                        </button>
+                        <button class="btn btn-ghost btn-sm" id="btn-tournament-home">
+                            <i data-lucide="home"></i> Home
+                        </button>
+                    </div>
+                </div>
+                <div class="bracket-view" id="bracket-view"></div>
+            </div>
+        </div>
+
+        <!-- ===== TOURNAMENT CHAMPION OVERLAY ===== -->
+        <div id="champion-overlay" class="overlay hidden">
+            <div class="overlay-card champion-card">
+                <div class="confetti-container" id="champion-confetti"></div>
+                <div class="crown-icon"><i data-lucide="crown"></i></div>
+                <h1 id="champion-name">Champion!</h1>
+                <p id="champion-tournament"></p>
+                <div class="champion-path" id="champion-path"></div>
+                <div class="overlay-actions">
+                    <button class="btn btn-primary" id="btn-share-tournament">
+                        <i data-lucide="share-2"></i> Share Stats
+                    </button>
+                    <button class="btn btn-ghost" id="btn-champion-close">
+                        <i data-lucide="home"></i> Home
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SCREEN: GROUP PLAY SETUP ===== -->
+        <div id="screen-group-setup" class="main-screen hidden">
+            <div class="setup-container">
+                <div class="screen-header">
+                    <h2><i data-lucide="users"></i> Group Play Setup</h2>
+                </div>
+                <div class="setup-form">
+                    <div class="form-group">
+                        <label>Sport</label>
+                        <div class="sport-selector">
+                            <button class="sport-select-btn active" data-group-sport="tennis">🎾 Tennis</button>
+                            <button class="sport-select-btn" data-group-sport="padel">🏓 Padel</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Play As</label>
+                        <div class="sport-selector">
+                            <button class="sport-select-btn active" data-group-origin="personal">Personal</button>
+                            <button class="sport-select-btn" data-group-origin="club">Club</button>
+                        </div>
+                    </div>
+                    <div id="group-club-container" class="form-group hidden">
+                        <label>Select Club</label>
+                        <select id="group-club-select"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Players (min 3)</label>
+                        <div class="tourney-player-grid" id="group-player-grid"></div>
+                        <p class="form-help" id="group-player-count">0 players selected (need at least 3)</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Time Per Match</label>
+                        <div class="sport-selector">
+                            <button class="sport-select-btn" data-group-time="60">1 min</button>
+                            <button class="sport-select-btn" data-group-time="120">2 min</button>
+                            <button class="sport-select-btn active" data-group-time="180">3 min</button>
+                            <button class="sport-select-btn" data-group-time="300">5 min</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Rotation Mode</label>
+                        <div class="sport-selector">
+                            <button class="sport-select-btn active" data-group-rotation="winner-stays">Winner Stays</button>
+                            <button class="sport-select-btn" data-group-rotation="loser-stays">Loser Stays</button>
+                            <button class="sport-select-btn" data-group-rotation="random">Random</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>End Session When</label>
+                        <div class="sport-selector">
+                            <button class="sport-select-btn active" data-group-end="timer">Timer (15 min)</button>
+                            <button class="sport-select-btn" data-group-end="wins">A Player Reaches 5 Wins</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-lg btn-full" id="btn-start-group">
+                        <i data-lucide="play"></i> Start Group Play
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SCREEN: GROUP PLAY LIVE ===== -->
+        <div id="screen-group" class="main-screen hidden">
+            <div class="group-play-container">
+                <div class="group-header">
+                    <div class="group-session-timer">
+                        <i data-lucide="clock"></i>
+                        <span id="group-session-timer">15:00</span>
+                    </div>
+                    <div class="group-match-timer">
+                        <svg class="countdown-ring" viewBox="0 0 100 100">
+                            <circle class="ring-bg" cx="50" cy="50" r="45"/>
+                            <circle class="ring-progress" cx="50" cy="50" r="45" id="countdown-ring-progress"/>
+                        </svg>
+                        <span class="countdown-text" id="group-match-timer">3:00</span>
+                    </div>
+                </div>
+
+                <div class="group-court">
+                    <div class="court-player court-left" id="group-court-p1">
+                        <div class="avatar-circle avatar-lg" id="group-p1-avatar"></div>
+                        <div class="court-player-name" id="group-p1-name">Player 1</div>
+                        <div class="court-player-wins" id="group-p1-wins">0 wins</div>
+                    </div>
+                    <div class="court-vs">VS</div>
+                    <div class="court-player court-right" id="group-court-p2">
+                        <div class="avatar-circle avatar-lg" id="group-p2-avatar"></div>
+                        <div class="court-player-name" id="group-p2-name">Player 2</div>
+                        <div class="court-player-wins" id="group-p2-wins">0 wins</div>
+                    </div>
+                </div>
+
+                <div class="group-scoring-buttons">
+                    <button class="score-btn score-btn-p1" id="btn-group-score-p1">
+                        <span>Point for</span>
+                        <span class="score-btn-name" id="group-score-btn-p1">Player 1</span>
+                    </button>
+                    <button class="score-btn score-btn-p2" id="btn-group-score-p2">
+                        <span>Point for</span>
+                        <span class="score-btn-name" id="group-score-btn-p2">Player 2</span>
+                    </button>
+                </div>
+
+                <div class="group-queue" id="group-queue">
+                    <h4><i data-lucide="arrow-right"></i> Next Up</h4>
+                    <div class="queue-list" id="group-queue-list"></div>
+                </div>
+
+                <div class="group-leaderboard" id="group-leaderboard">
+                    <h4><i data-lucide="medal"></i> Leaderboard</h4>
+                    <table class="leaderboard-table" id="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Player</th>
+                                <th>W</th>
+                                <th>L</th>
+                                <th>Win%</th>
+                                <th>Streak</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body"></tbody>
+                    </table>
+                </div>
+
+                <button class="btn btn-danger btn-sm" id="btn-end-group-session">
+                    <i data-lucide="flag"></i> End Session
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== GROUP PLAY TRANSITION ===== -->
+        <div id="group-transition" class="overlay hidden">
+            <div class="overlay-card transition-card">
+                <h3>Next Up!</h3>
+                <div class="transition-players" id="transition-players"></div>
+            </div>
+        </div>
+
+        <!-- ===== GROUP PLAY SUMMARY ===== -->
+        <div id="group-summary-overlay" class="overlay hidden">
+            <div class="overlay-card summary-card">
+                <div class="trophy-icon"><i data-lucide="medal"></i></div>
+                <h2>Session Complete!</h2>
+                <div class="summary-leaderboard" id="summary-leaderboard"></div>
+                <div class="summary-stats" id="summary-stats"></div>
+                <div class="overlay-actions">
+                    <button class="btn btn-primary" id="btn-share-group">
+                        <i data-lucide="share-2"></i> Share Stats
+                    </button>
+                    <button class="btn btn-ghost" id="btn-group-summary-close">
+                        <i data-lucide="home"></i> Home
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SCREEN: CLUBS ===== -->
+        <div id="screen-clubs" class="main-screen hidden">
+            <div class="clubs-container">
+                <div class="screen-header">
+                    <h2><i data-lucide="building-2"></i> My Clubs</h2>
+                    <button class="btn btn-primary btn-sm" id="btn-create-club">
+                        <i data-lucide="plus"></i> Create Club
+                    </button>
+                </div>
+                <div id="clubs-list" class="clubs-list"></div>
+            </div>
+        </div>
+
+        <!-- ===== CLUB DASHBOARD ===== -->
+        <div id="screen-club-detail" class="main-screen hidden">
+            <div class="club-detail-container">
+                <div class="screen-header">
+                    <h2 id="club-detail-name"><i data-lucide="building-2"></i> Club</h2>
+                    <button class="btn btn-ghost btn-sm" id="btn-back-clubs">
+                        <i data-lucide="arrow-left"></i> Back
+                    </button>
+                </div>
+                <div class="club-detail-header" id="club-detail-header"></div>
+                <div class="club-detail-tabs">
+                    <button class="tab-btn active" data-club-tab="members">Members</button>
+                    <button class="tab-btn" data-club-tab="roster">Player Roster</button>
+                    <button class="tab-btn" data-club-tab="matches">Matches</button>
+                    <button class="tab-btn" data-club-tab="stats">Stats</button>
+                </div>
+                <div id="club-tab-members" class="club-tab-content"></div>
+                <div id="club-tab-roster" class="club-tab-content hidden"></div>
+                <div id="club-tab-matches" class="club-tab-content hidden"></div>
+                <div id="club-tab-stats" class="club-tab-content hidden"></div>
+            </div>
+        </div>
+
+        <!-- ===== CLUB CREATE MODAL ===== -->
+        <div id="modal-club" class="modal-overlay hidden">
+            <div class="modal-card modal-lg">
+                <div class="modal-header">
+                    <h3 id="modal-club-title">Create Club</h3>
+                    <button class="btn-icon modal-close" id="close-modal-club"><i data-lucide="x"></i></button>
+                </div>
+                <form id="form-club">
+                    <input type="hidden" id="club-edit-id">
+                    <div class="form-group">
+                        <label for="club-name-input">Club Name</label>
+                        <input type="text" id="club-name-input" placeholder="My Tennis Club" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="club-description">Description</label>
+                        <textarea id="club-description" placeholder="About this club..." rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="club-location">Location</label>
+                        <input type="text" id="club-location" placeholder="City, Country">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-ghost" id="cancel-modal-club">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Club</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ===== SCREEN: HISTORY ===== -->
+        <div id="screen-history" class="main-screen hidden">
+            <div class="history-container">
+                <div class="screen-header">
+                    <h2><i data-lucide="clock"></i> History</h2>
+                </div>
+                <div class="history-tabs">
+                    <button class="tab-btn active" data-history-tab="matches">Matches</button>
+                    <button class="tab-btn" data-history-tab="tournaments">Tournaments</button>
+                    <button class="tab-btn" data-history-tab="group-sessions">Group Sessions</button>
+                </div>
+                <div class="search-box">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="search-history" placeholder="Search history...">
+                </div>
+                <div id="history-matches" class="history-list"></div>
+                <div id="history-tournaments" class="history-list hidden"></div>
+                <div id="history-group-sessions" class="history-list hidden"></div>
+            </div>
+        </div>
+
+        <!-- ===== SHARE MODAL ===== -->
+        <div id="modal-share" class="modal-overlay hidden">
+            <div class="modal-card modal-xl">
+                <div class="modal-header">
+                    <h3>Share Stats</h3>
+                    <button class="btn-icon modal-close" id="close-modal-share"><i data-lucide="x"></i></button>
+                </div>
+                <div class="share-container">
+                    <!-- Template Picker -->
+                    <div class="share-templates" id="share-template-picker">
+                        <h4>Choose Template</h4>
+                        <div class="template-grid" id="template-grid">
+                            <button class="template-card active" data-template="1">
+                                <div class="template-thumb">🏆</div>
+                                <span>Final Score</span>
+                            </button>
+                            <button class="template-card" data-template="2">
+                                <div class="template-thumb">📊</div>
+                                <span>Full Stats</span>
+                            </button>
+                            <button class="template-card" data-template="3">
+                                <div class="template-thumb">🎾</div>
+                                <span>Match Summary</span>
+                            </button>
+                            <button class="template-card" data-template="4">
+                                <div class="template-thumb">🏅</div>
+                                <span>Champion</span>
+                            </button>
+                            <button class="template-card" data-template="5">
+                                <div class="template-thumb">👥</div>
+                                <span>Group Recap</span>
+                            </button>
+                            <button class="template-card" data-template="6">
+                                <div class="template-thumb">🥊</div>
+                                <span>Head-to-Head</span>
+                            </button>
+                            <button class="template-card" data-template="7">
+                                <div class="template-thumb">⚡</div>
+                                <span>Minimal</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Preview -->
+                    <div class="share-preview">
+                        <canvas id="share-canvas" width="1080" height="1080"></canvas>
+                    </div>
+
+                    <!-- Settings -->
+                    <div class="share-settings">
+                        <h4>Customize</h4>
+                        <div class="form-group">
+                            <label>Aspect Ratio</label>
+                            <div class="sport-selector">
+                                <button class="sport-select-btn active" data-aspect="1:1">1:1</button>
+                                <button class="sport-select-btn" data-aspect="16:9">16:9</button>
+                                <button class="sport-select-btn" data-aspect="9:16">9:16</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Background</label>
+                            <div class="color-swatches" id="bg-color-swatches">
+                                <button class="swatch active" data-bg="#0a0f0d" style="background:#0a0f0d"></button>
+                                <button class="swatch" data-bg="#1a2923" style="background:#1a2923"></button>
+                                <button class="swatch" data-bg="#0f172a" style="background:#0f172a"></button>
+                                <button class="swatch" data-bg="#1e1b4b" style="background:#1e1b4b"></button>
+                                <button class="swatch" data-bg="#ffffff" style="background:#ffffff;border:1px solid #ccc"></button>
+                                <button class="swatch" data-bg="#f8fafc" style="background:#f8fafc;border:1px solid #ccc"></button>
+                            </div>
+                            <label class="btn btn-ghost btn-sm btn-full mt-1">
+                                <i data-lucide="upload"></i> Upload Image
+                                <input type="file" id="bg-upload" accept="image/*" hidden>
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>Overlay Theme</label>
+                            <div class="sport-selector">
+                                <button class="sport-select-btn active" data-overlay="dark">Dark</button>
+                                <button class="sport-select-btn" data-overlay="light">Light</button>
+                                <button class="sport-select-btn" data-overlay="green">Green</button>
+                                <button class="sport-select-btn" data-overlay="transparent">Clear</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Accent Color</label>
+                            <input type="color" id="accent-color" value="#22c55e">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-check">
+                                <input type="checkbox" id="share-club-branding">
+                                Add Club Branding
+                            </label>
+                        </div>
+                        <div class="share-export-btns">
+                            <button class="btn btn-primary btn-full" id="btn-export-png">
+                                <i data-lucide="download"></i> Download PNG
+                            </button>
+                            <button class="btn btn-ghost btn-full" id="btn-export-clipboard">
+                                <i data-lucide="copy"></i> Copy to Clipboard
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SCREEN: PROFILE / SETTINGS ===== -->
+        <div id="screen-profile" class="main-screen hidden">
+            <div class="profile-container">
+                <div class="screen-header">
+                    <h2><i data-lucide="user"></i> Profile</h2>
+                </div>
+                <div class="profile-card" id="profile-card"></div>
+                <div class="settings-section">
+                    <h3>Data Management</h3>
+                    <button class="btn btn-ghost btn-full" id="btn-export-data">
+                        <i data-lucide="download"></i> Export All Data (JSON)
+                    </button>
+                    <label class="btn btn-ghost btn-full mt-1">
+                        <i data-lucide="upload"></i> Import Data (JSON)
+                        <input type="file" id="btn-import-data" accept=".json" hidden>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== BOTTOM NAV BAR (MOBILE) ===== -->
+        <nav class="bottom-nav" id="bottom-nav">
+            <button class="nav-item active" data-nav="dashboard">
+                <i data-lucide="home"></i>
+                <span>Home</span>
+            </button>
+            <button class="nav-item" data-nav="players">
+                <i data-lucide="user-cog"></i>
+                <span>Players</span>
+            </button>
+            <button class="nav-item" data-nav="match-setup">
+                <i data-lucide="swords"></i>
+                <span>Match</span>
+            </button>
+            <button class="nav-item" data-nav="history">
+                <i data-lucide="clock"></i>
+                <span>History</span>
+            </button>
+            <button class="nav-item" data-nav="clubs">
+                <i data-lucide="building-2"></i>
+                <span>Clubs</span>
+            </button>
+        </nav>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
