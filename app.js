@@ -275,9 +275,10 @@ const Router = {
     },
 
     showScreen(screen, opts = {}) {
-        // Hide all screens
+        // Hide ALL screens
         document.querySelectorAll('.main-screen').forEach(s => s.classList.add('hidden'));
         document.getElementById('screen-auth').classList.add('hidden');
+        document.getElementById('screen-setup').classList.add('hidden');
 
         // Show target
         const el = document.getElementById(`screen-${screen}`);
