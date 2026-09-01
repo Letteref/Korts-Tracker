@@ -293,6 +293,13 @@ const Router = {
             document.getElementById('app-container').classList.remove('hidden');
         }
 
+        // Hide header & nav during onboarding
+        const isOnboarding = screen === 'setup';
+        const header = document.getElementById('app-header');
+        const bottomNav = document.getElementById('bottom-nav');
+        if (header) header.style.display = isOnboarding ? 'none' : '';
+        if (bottomNav) bottomNav.style.display = isOnboarding ? 'none' : '';
+
         // Update bottom nav
         document.querySelectorAll('.nav-item').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.nav === screen);
@@ -2000,6 +2007,11 @@ const UI = {
         Store._set('myName', this._onbMe);
 
         Toast.show(`Let's play, ${this._onbMe}!`, 'success');
+        // Show header & nav again
+        const header = document.getElementById('app-header');
+        const bottomNav = document.getElementById('bottom-nav');
+        if (header) header.style.display = '';
+        if (bottomNav) bottomNav.style.display = '';
         Auth.initDefaultPlayers();
         UI.updateUserUI();
         Router.navigate('dashboard');
