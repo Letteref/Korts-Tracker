@@ -680,15 +680,37 @@ const MatchManager = {
     },
 
     startTimer() {
+        this.paused = false;
         this.timerInterval = setInterval(() => {
-            this.elapsedSeconds++;
-            const el = document.getElementById('match-timer-display');
-            if (el) el.textContent = Utils.formatTime(this.elapsedSeconds);
+            if (!this.paused) {
+                this.elapsedSeconds++;
+                const el = document.getElementById('match-timer-display');
+                if (el) el.textContent = Utils.formatTime(this.elapsedSeconds);
+            }
         }, 1000);
     },
 
     stopTimer() {
         clearInterval(this.timerInterval);
+    },
+
+    togglePause() {
+        this.paused = !this.paused;
+        const btn = document.getElementById('btn-match-pause');
+        const timerEl = document.getElementById('match-timer-display');
+
+        if (this.paused) {
+            btn.innerHTML = '<i data-lucide="play"></i>';
+            btn.title = 'Resume';
+            if (timerEl) timerEl.classList.add('paused');
+            Toast.show('Match paused', 'info');
+        } else {
+            btn.innerHTML = '<i data-lucide="pause"></i>';
+            btn.title = 'Pause';
+            if (timerEl) timerEl.classList.remove('paused');
+            Toast.show('Match resumed', 'success');
+        }
+        lucide.createIcons();
     },
 
     awardPoint(player) {
@@ -3390,6 +3412,7 @@ const Events = {
         document.getElementById('match-warning-stay')?.addEventListener('click', () => Router.stayInMatch());
         document.getElementById('match-warning-end')?.addEventListener('click', () => Router.confirmLeaveMatch());
 
+        document.getElementById('btn-match-pause')?.addEventListener('click', () => MatchManager.togglePause());
         document.getElementById('btn-match-undo')?.addEventListener('click', () => MatchManager.undo());
         document.getElementById('btn-match-retire')?.addEventListener('click', () => {
             if (confirm('Retire this match? The other player wins.')) {

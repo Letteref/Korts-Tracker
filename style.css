@@ -1743,6 +1743,17 @@ input::placeholder, textarea::placeholder {
     font-weight: 700;
     color: var(--text-secondary);
     font-variant-numeric: tabular-nums;
+    transition: all var(--transition);
+}
+
+.match-timer.paused {
+    color: var(--gold);
+    animation: timerBlink 1s infinite;
+}
+
+@keyframes timerBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
 }
 
 .match-actions-bar {
