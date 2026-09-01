@@ -262,11 +262,49 @@ const Router = {
     init() {
         window.addEventListener('hashchange', () => this.handleRoute());
         this.handleRoute();
+
+        // Intercept browser back button
+        window.addEventListener('popstate', (e) => {
+            if (this.currentScreen === 'match' && MatchManager.currentState) {
+                e.preventDefault();
+                history.pushState(null, '', location.href);
+                this.showMatchWarning();
+            }
+        });
+        // Push initial state
+        history.pushState(null, '', location.href);
     },
 
     navigate(screen, opts = {}) {
+        // Check if match is in progress and user is leaving
+        if (this.currentScreen === 'match' && MatchManager.currentState && screen !== 'match') {
+            this._pendingNav = { screen, opts };
+            this.showMatchWarning();
+            return;
+        }
         if (this.currentScreen) this.history.push(this.currentScreen);
         this.showScreen(screen, opts);
+    },
+
+    showMatchWarning() {
+        const modal = document.getElementById('match-warning-modal');
+        modal.classList.remove('hidden');
+        lucide.createIcons();
+    },
+
+    hideMatchWarning() {
+        document.getElementById('match-warning-modal').classList.add('hidden');
+        this._pendingNav = null;
+    },
+
+    confirmLeaveMatch() {
+        // End the match and navigate
+        MatchManager.retire(MatchManager.currentState.serving === 'p1' ? 'p2' : 'p1');
+        this.hideMatchWarning();
+    },
+
+    stayInMatch() {
+        this.hideMatchWarning();
     },
 
     back() {
@@ -3315,6 +3353,10 @@ const Events = {
         document.getElementById('btn-start-match')?.addEventListener('click', () => UI.startMatch());
         document.getElementById('btn-score-p1')?.addEventListener('click', () => MatchManager.awardPoint('p1'));
         document.getElementById('btn-score-p2')?.addEventListener('click', () => MatchManager.awardPoint('p2'));
+        // Match warning modal
+        document.getElementById('match-warning-stay')?.addEventListener('click', () => Router.stayInMatch());
+        document.getElementById('match-warning-end')?.addEventListener('click', () => Router.confirmLeaveMatch());
+
         document.getElementById('btn-match-undo')?.addEventListener('click', () => MatchManager.undo());
         document.getElementById('btn-match-retire')?.addEventListener('click', () => {
             if (confirm('Retire this match? The other player wins.')) {

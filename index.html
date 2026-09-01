@@ -36,6 +36,25 @@
         </div>
     </div>
 
+    <!-- Match In Progress Warning -->
+    <div id="match-warning-modal" class="modal-overlay hidden">
+        <div class="modal-card match-warning-card">
+            <div class="match-warning-icon">
+                <i data-lucide="alert-triangle"></i>
+            </div>
+            <h3>Match in Progress</h3>
+            <p>You have an ongoing match. What would you like to do?</p>
+            <div class="match-warning-actions">
+                <button class="btn btn-primary btn-full" id="match-warning-stay">
+                    <i data-lucide="arrow-left"></i> Back to Match
+                </button>
+                <button class="btn btn-danger btn-full" id="match-warning-end">
+                    <i data-lucide="flag"></i> End Match
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== WELCOME SCREEN ==================== -->
     <div id="screen-auth" class="screen">
         <div class="nrc-welcome">

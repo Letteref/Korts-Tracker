@@ -2715,6 +2715,46 @@ input::placeholder, textarea::placeholder {
     margin-top: 20px;
 }
 
+/* Match Warning Modal */
+.match-warning-card {
+    text-align: center;
+    max-width: 360px;
+}
+
+.match-warning-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--gold-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.match-warning-icon svg {
+    width: 28px;
+    height: 28px;
+    color: var(--gold);
+}
+
+.match-warning-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+}
+
+.match-warning-card p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+}
+
+.match-warning-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
 /* Share Modal */
 .share-container {
     display: grid;
