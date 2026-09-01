@@ -383,28 +383,6 @@ input::placeholder, textarea::placeholder {
     padding: 24px;
 }
 
-/* Top — minimal logo */
-.nrc-top {
-    display: flex;
-    justify-content: flex-start;
-}
-
-.nrc-logo {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.nrc-logo svg {
-    width: 20px;
-    height: 20px;
-    color: #000;
-}
-
 /* Center — big headline */
 .nrc-center {
     flex: 1;
@@ -415,20 +393,47 @@ input::placeholder, textarea::placeholder {
     padding-bottom: 20px;
 }
 
+/* Brand — logo outline + title side by side */
+.nrc-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.nrc-logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.nrc-logo svg {
+    width: 22px;
+    height: 22px;
+    color: var(--accent);
+}
+
 .nrc-headline {
-    font-size: 4rem;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 3.5rem;
     font-weight: 900;
     letter-spacing: 2px;
     color: #fff;
     line-height: 1;
-    margin-bottom: 12px;
 }
 
 .nrc-sub {
-    font-size: 1.1rem;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
     color: rgba(255, 255, 255, 0.4);
-    line-height: 1.5;
+    font-style: italic;
     font-weight: 400;
+    line-height: 1.4;
 }
 
 /* Bottom — CTA + footnote */
