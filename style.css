@@ -2579,6 +2579,26 @@ input::placeholder, textarea::placeholder {
 .player-card-name {
     font-weight: 700;
     font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.player-me-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--gold-dim);
+    color: var(--gold);
+    border-radius: 20px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.player-card-me {
+    border-color: rgba(245, 158, 11, 0.25);
+    background: linear-gradient(135deg, var(--bg-card), rgba(245, 158, 11, 0.03));
 }
 
 .player-card-meta {

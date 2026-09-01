@@ -2126,6 +2126,7 @@ const UI = {
     renderPlayers() {
         const players = Store.getPlayers();
         const roster = document.getElementById('player-roster');
+        const myName = Store._getSingle('myName') || '';
 
         if (players.length === 0) {
             roster.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:40px">No players yet. Add your first player!</p>';
@@ -2134,11 +2135,12 @@ const UI = {
 
         roster.innerHTML = players.map(p => {
             const stats = Statistics.getPlayerStats(p.id);
+            const isMe = p.name === myName;
             return `
-                <div class="player-card">
+                <div class="player-card ${isMe ? 'player-card-me' : ''}">
                     <div class="avatar-circle" style="background:${Utils.getAvatarColor(p.name)}">${Utils.getInitials(p.name)}</div>
                     <div class="player-card-info">
-                        <div class="player-card-name">${Utils.escapeHtml(p.name)}</div>
+                        <div class="player-card-name">${Utils.escapeHtml(p.name)} ${isMe ? '<span class="player-me-badge">You</span>' : ''}</div>
                         <div class="player-card-meta">
                             <span class="badge badge-${p.skill || 'intermediate'}">${p.skill || 'intermediate'}</span>
                             ${stats.matchesPlayed > 0 ? `<span>${stats.matchesPlayed} matches • ${stats.winRate}% win</span>` : ''}
