@@ -358,6 +358,306 @@ input::placeholder, textarea::placeholder {
     50% { transform: translateY(-20px) rotate(15deg); }
 }
 
+/* ===== ONBOARDING FLOW ===== */
+.onb-welcome {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #000;
+}
+
+.onb-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 30%, #0d3328 0%, #071a12 50%, #000 100%);
+}
+
+.onb-content {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+}
+
+/* Step indicators */
+.onb-steps {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 40px;
+}
+
+.onb-step {
+    height: 4px;
+    flex: 1;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+    transition: background 0.3s;
+}
+
+.onb-step.active {
+    background: var(--accent);
+}
+
+/* Pages */
+.onb-page {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+}
+
+.onb-page.active {
+    display: flex;
+}
+
+.onb-page-inner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.onb-page-bottom {
+    padding-bottom: 16px;
+}
+
+/* Icon */
+.onb-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.onb-icon svg {
+    width: 28px;
+    height: 28px;
+    color: var(--accent);
+}
+
+.onb-icon-done {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.onb-icon-done svg {
+    color: #000;
+}
+
+/* Text */
+.onb-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 8px;
+    line-height: 1.1;
+}
+
+.onb-desc {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 28px;
+}
+
+/* Input */
+.onb-input-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.onb-input {
+    flex: 1;
+    padding: 14px 18px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 14px;
+    color: #fff;
+    font-family: var(--font);
+    font-size: 1rem;
+    outline: none;
+    transition: border-color var(--transition);
+}
+
+.onb-input:focus {
+    border-color: var(--accent);
+}
+
+.onb-input::placeholder {
+    color: rgba(255, 255, 255, 0.25);
+}
+
+.onb-add-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: var(--accent);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all var(--transition);
+}
+
+.onb-add-btn:hover {
+    background: var(--accent-hover);
+}
+
+.onb-add-btn svg {
+    width: 24px;
+    height: 24px;
+    color: #000;
+}
+
+/* Player list */
+.onb-player-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.onb-player-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.onb-player-item .avatar-circle {
+    width: 32px;
+    height: 32px;
+    font-size: 0.7rem;
+}
+
+.onb-player-item-name {
+    flex: 1;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.onb-player-item-remove {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    transition: color var(--transition);
+}
+
+.onb-player-item-remove:hover {
+    color: var(--red);
+}
+
+.onb-player-item-remove svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Ready list */
+.onb-ready-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.onb-ready-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    border-radius: 50px;
+}
+
+.onb-ready-chip .avatar-circle {
+    width: 28px;
+    height: 28px;
+    font-size: 0.6rem;
+}
+
+.onb-ready-chip span {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+/* CTA */
+.onb-next-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 18px 24px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 60px;
+    font-family: var(--font);
+    font-size: 1.05rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.onb-next-btn:disabled {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.3);
+    cursor: not-allowed;
+}
+
+.onb-next-btn:not(:disabled):hover {
+    background: var(--accent-hover);
+}
+
+.onb-next-btn:not(:disabled):active {
+    transform: scale(0.98);
+}
+
+.onb-next-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Skip */
+.onb-skip {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 16px;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.25);
+    cursor: pointer;
+    transition: color var(--transition);
+}
+
+.onb-skip:hover {
+    color: rgba(255, 255, 255, 0.5);
+}
+
 /* ===== NIKE RUN CLUB STYLE ===== */
 .nrc-welcome {
     position: relative;

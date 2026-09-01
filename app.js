@@ -316,6 +316,7 @@ const Router = {
     renderScreen(screen, opts) {
         switch (screen) {
             case 'dashboard': UI.renderDashboard(); break;
+            case 'setup': UI.renderOnboarding(); break;
             case 'admin': UI.renderAdminDashboard(); break;
             case 'players': UI.renderPlayers(); break;
             case 'match-setup': UI.renderMatchSetup(); break;
@@ -1877,6 +1878,103 @@ const UI = {
         if (adminBtn) adminBtn.classList.add('hidden');
     },
 
+    // ===== ONBOARDING =====
+    renderOnboarding() {
+        this._onbPlayers = [];
+        this._onbStep = 1;
+        this.updateOnbStep();
+        this.renderOnbList();
+    },
+
+    updateOnbStep() {
+        // Update step indicators
+        document.querySelectorAll('.onb-step').forEach(s => {
+            s.classList.toggle('active', parseInt(s.dataset.step) <= this._onbStep);
+        });
+        // Show/hide pages
+        document.querySelectorAll('.onb-page').forEach((p, i) => {
+            p.classList.toggle('active', i + 1 === this._onbStep);
+        });
+    },
+
+    renderOnbList() {
+        const list = document.getElementById('onb-player-list');
+        const readyList = document.getElementById('onb-ready-list');
+        const countEl = document.getElementById('onb-ready-count');
+        const continueBtn = document.getElementById('onb-to-step2');
+
+        // Player list on step 1
+        if (list) {
+            list.innerHTML = this._onbPlayers.map((p, i) => `
+                <div class="onb-player-item">
+                    <div class="avatar-circle" style="background:${Utils.getAvatarColor(p)}">${Utils.getInitials(p)}</div>
+                    <span class="onb-player-item-name">${Utils.escapeHtml(p)}</span>
+                    <button class="onb-player-item-remove" onclick="UI.removeOnbPlayer(${i})">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        // Ready list on step 2
+        if (readyList) {
+            readyList.innerHTML = this._onbPlayers.map(p => `
+                <div class="onb-ready-chip">
+                    <div class="avatar-circle" style="background:${Utils.getAvatarColor(p)}">${Utils.getInitials(p)}</div>
+                    <span>${Utils.escapeHtml(p)}</span>
+                </div>
+            `).join('');
+        }
+
+        if (countEl) {
+            countEl.textContent = `${this._onbPlayers.length} player${this._onbPlayers.length !== 1 ? 's' : ''} ready to play`;
+        }
+
+        // Enable/disable continue button
+        if (continueBtn) {
+            continueBtn.disabled = this._onbPlayers.length < 2;
+        }
+    },
+
+    addOnbPlayer() {
+        const input = document.getElementById('onb-player-input');
+        const name = input.value.trim();
+        if (!name) return;
+        if (this._onbPlayers.includes(name)) {
+            Toast.show('Player already added', 'error');
+            return;
+        }
+        this._onbPlayers.push(name);
+        input.value = '';
+        input.focus();
+        this.renderOnbList();
+    },
+
+    removeOnbPlayer(index) {
+        this._onbPlayers.splice(index, 1);
+        this.renderOnbList();
+    },
+
+    finishOnboarding() {
+        // Save players
+        const existing = Store.getPlayers();
+        this._onbPlayers.forEach(name => {
+            if (!existing.find(p => p.name === name)) {
+                existing.push({
+                    id: Utils.generateId(),
+                    name,
+                    skill: 'intermediate',
+                    notes: '',
+                    createdAt: new Date().toISOString()
+                });
+            }
+        });
+        Store.savePlayers(existing);
+        Toast.show(`${this._onbPlayers.length} players added!`, 'success');
+        Router.navigate('dashboard');
+    },
+
     // ===== DASHBOARD =====
     renderDashboard() {
         // Hero greeting
@@ -2971,11 +3069,37 @@ const UI = {
 // ============================================================
 const Events = {
     init() {
-        // Auth forms
         // Welcome screen — Start button
         document.getElementById('btn-welcome-start')?.addEventListener('click', () => {
             Auth.initDefaultPlayers();
             UI.updateUserUI();
+            // Check if players already exist
+            const players = Store.getPlayers();
+            if (players.length >= 2) {
+                Router.navigate('dashboard');
+            } else {
+                Router.navigate('setup');
+            }
+        });
+
+        // Onboarding — Add player
+        document.getElementById('onb-add-player')?.addEventListener('click', () => UI.addOnbPlayer());
+        document.getElementById('onb-player-input')?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); UI.addOnbPlayer(); }
+        });
+
+        // Onboarding — Step 2
+        document.getElementById('onb-to-step2')?.addEventListener('click', () => {
+            UI._onbStep = 2;
+            UI.updateOnbStep();
+            UI.renderOnbList();
+        });
+
+        // Onboarding — Go to dashboard
+        document.getElementById('onb-go-dashboard')?.addEventListener('click', () => UI.finishOnboarding());
+
+        // Onboarding — Skip
+        document.getElementById('onb-skip')?.addEventListener('click', () => {
             Router.navigate('dashboard');
         });
 

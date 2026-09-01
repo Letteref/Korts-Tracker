@@ -62,6 +62,63 @@
         </div>
     </div>
 
+    <!-- ==================== PLAYER SETUP ONBOARDING ==================== -->
+    <div id="screen-setup" class="screen hidden">
+        <div class="onb-welcome">
+            <div class="onb-bg"></div>
+            <div class="onb-content">
+                <!-- Step indicator -->
+                <div class="onb-steps">
+                    <div class="onb-step active" data-step="1"></div>
+                    <div class="onb-step" data-step="2"></div>
+                </div>
+
+                <!-- Step 1: Add Players -->
+                <div class="onb-page active" id="onb-page-1">
+                    <div class="onb-page-inner">
+                        <div class="onb-icon">
+                            <i data-lucide="user-plus"></i>
+                        </div>
+                        <h2 class="onb-title">Add your players</h2>
+                        <p class="onb-desc">Start with at least 2 players</p>
+                        <div class="onb-input-group">
+                            <input type="text" id="onb-player-input" class="onb-input" placeholder="Type a player name" autocomplete="off">
+                            <button class="onb-add-btn" id="onb-add-player">
+                                <i data-lucide="plus"></i>
+                            </button>
+                        </div>
+                        <div class="onb-player-list" id="onb-player-list"></div>
+                    </div>
+                    <div class="onb-page-bottom">
+                        <button class="onb-next-btn" id="onb-to-step2" disabled>
+                            <span>Continue</span>
+                            <i data-lucide="arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Ready -->
+                <div class="onb-page" id="onb-page-2">
+                    <div class="onb-page-inner">
+                        <div class="onb-icon onb-icon-done">
+                            <i data-lucide="check"></i>
+                        </div>
+                        <h2 class="onb-title">You're all set!</h2>
+                        <p class="onb-desc" id="onb-ready-count">2 players ready to play</p>
+                        <div class="onb-ready-list" id="onb-ready-list"></div>
+                    </div>
+                    <div class="onb-page-bottom">
+                        <button class="onb-next-btn" id="onb-go-dashboard">
+                            <span>Start Scoring</span>
+                            <i data-lucide="play"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <p class="onb-skip" id="onb-skip">Skip for now</p>
+        </div>
+    </div>
+
     <!-- ==================== MAIN APP CONTAINER ==================== -->
     <div id="app-container" class="hidden">
 
