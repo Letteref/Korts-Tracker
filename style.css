@@ -605,6 +605,15 @@ input::placeholder, textarea::placeholder {
     color: var(--accent);
 }
 
+.onb-ready-me {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.onb-ready-me span {
+    color: var(--gold);
+}
+
 /* CTA */
 .onb-next-btn {
     display: flex;
@@ -640,6 +649,39 @@ input::placeholder, textarea::placeholder {
 .onb-next-btn svg {
     width: 20px;
     height: 20px;
+}
+
+/* Me section */
+.onb-me-section {
+    margin-bottom: 8px;
+}
+
+.onb-me-input-wrap {
+    position: relative;
+}
+
+.onb-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0 16px;
+}
+
+.onb-divider::before,
+.onb-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.onb-divider span {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 /* Skip */

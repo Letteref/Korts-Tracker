@@ -77,12 +77,20 @@
                 <div class="onb-page active" id="onb-page-1">
                     <div class="onb-page-inner">
                         <div class="onb-icon">
-                            <i data-lucide="user-plus"></i>
+                            <i data-lucide="user"></i>
                         </div>
-                        <h2 class="onb-title">Add your players</h2>
-                        <p class="onb-desc">Start with at least 2 players</p>
+                        <h2 class="onb-title">Who are you?</h2>
+                        <p class="onb-desc">Enter your name to get started</p>
+                        <div class="onb-me-section">
+                            <div class="onb-me-input-wrap">
+                                <input type="text" id="onb-me-input" class="onb-input" placeholder="Your name" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="onb-divider">
+                            <span>Add other players</span>
+                        </div>
                         <div class="onb-input-group">
-                            <input type="text" id="onb-player-input" class="onb-input" placeholder="Type a player name" autocomplete="off">
+                            <input type="text" id="onb-player-input" class="onb-input" placeholder="Player name" autocomplete="off">
                             <button class="onb-add-btn" id="onb-add-player">
                                 <i data-lucide="plus"></i>
                             </button>
@@ -104,7 +112,7 @@
                             <i data-lucide="check"></i>
                         </div>
                         <h2 class="onb-title">You're all set!</h2>
-                        <p class="onb-desc" id="onb-ready-count">2 players ready to play</p>
+                        <p class="onb-desc" id="onb-ready-count">Ready to play</p>
                         <div class="onb-ready-list" id="onb-ready-list"></div>
                     </div>
                     <div class="onb-page-bottom">

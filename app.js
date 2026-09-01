@@ -248,16 +248,7 @@ const Auth = {
     },
 
     initDefaultPlayers() {
-        if (Store.getPlayers().length === 0) {
-            const defaults = ['Player 1', 'Player 2', 'Player 3', 'Player 4'].map(name => ({
-                id: Utils.generateId(),
-                name,
-                skill: 'intermediate',
-                notes: '',
-                createdAt: new Date().toISOString()
-            }));
-            Store.savePlayers(defaults);
-        }
+        // No default players — user adds them during onboarding
     }
 };
 
@@ -1869,7 +1860,8 @@ const UI = {
             avatar.style.background = Utils.getAvatarColor('Korts');
         }
 
-        document.getElementById('dropdown-displayname').textContent = 'Player';
+        const myName = Store._getSingle('myName') || 'Player';
+        document.getElementById('dropdown-displayname').textContent = myName;
         document.getElementById('dropdown-role').textContent = 'player';
         document.getElementById('dropdown-role').className = 'badge badge-member';
 
@@ -1880,28 +1872,40 @@ const UI = {
 
     // ===== ONBOARDING =====
     renderOnboarding() {
+        this._onbMe = '';
         this._onbPlayers = [];
         this._onbStep = 1;
         this.updateOnbStep();
         this.renderOnbList();
+        // Clear inputs
+        const meInput = document.getElementById('onb-me-input');
+        const playerInput = document.getElementById('onb-player-input');
+        if (meInput) meInput.value = '';
+        if (playerInput) playerInput.value = '';
+        // Update continue button state
+        this.updateOnbContinueBtn();
     },
 
     updateOnbStep() {
-        // Update step indicators
         document.querySelectorAll('.onb-step').forEach(s => {
             s.classList.toggle('active', parseInt(s.dataset.step) <= this._onbStep);
         });
-        // Show/hide pages
         document.querySelectorAll('.onb-page').forEach((p, i) => {
             p.classList.toggle('active', i + 1 === this._onbStep);
         });
+    },
+
+    updateOnbContinueBtn() {
+        const btn = document.getElementById('onb-to-step2');
+        if (btn) {
+            btn.disabled = !this._onbMe || this._onbPlayers.length < 1;
+        }
     },
 
     renderOnbList() {
         const list = document.getElementById('onb-player-list');
         const readyList = document.getElementById('onb-ready-list');
         const countEl = document.getElementById('onb-ready-count');
-        const continueBtn = document.getElementById('onb-to-step2');
 
         // Player list on step 1
         if (list) {
@@ -1917,30 +1921,39 @@ const UI = {
             lucide.createIcons();
         }
 
-        // Ready list on step 2
+        // Ready list on step 2 — 'Me' first, then others
         if (readyList) {
-            readyList.innerHTML = this._onbPlayers.map(p => `
-                <div class="onb-ready-chip">
+            const allPlayers = this._onbMe ? [this._onbMe, ...this._onbPlayers] : this._onbPlayers;
+            readyList.innerHTML = allPlayers.map((p, i) => `
+                <div class="onb-ready-chip ${i === 0 ? 'onb-ready-me' : ''}">
                     <div class="avatar-circle" style="background:${Utils.getAvatarColor(p)}">${Utils.getInitials(p)}</div>
-                    <span>${Utils.escapeHtml(p)}</span>
+                    <span>${Utils.escapeHtml(p)}${i === 0 ? ' (You)' : ''}</span>
                 </div>
             `).join('');
         }
 
         if (countEl) {
-            countEl.textContent = `${this._onbPlayers.length} player${this._onbPlayers.length !== 1 ? 's' : ''} ready to play`;
+            const total = this._onbMe ? this._onbPlayers.length + 1 : this._onbPlayers.length;
+            countEl.textContent = `${total} player${total !== 1 ? 's' : ''} ready to play`;
         }
 
-        // Enable/disable continue button
-        if (continueBtn) {
-            continueBtn.disabled = this._onbPlayers.length < 2;
-        }
+        this.updateOnbContinueBtn();
+    },
+
+    setOnbMe() {
+        const input = document.getElementById('onb-me-input');
+        this._onbMe = input?.value?.trim() || '';
+        this.updateOnbContinueBtn();
     },
 
     addOnbPlayer() {
         const input = document.getElementById('onb-player-input');
         const name = input.value.trim();
         if (!name) return;
+        if (name === this._onbMe) {
+            Toast.show('This is your name — add other players', 'error');
+            return;
+        }
         if (this._onbPlayers.includes(name)) {
             Toast.show('Player already added', 'error');
             return;
@@ -1957,34 +1970,52 @@ const UI = {
     },
 
     finishOnboarding() {
-        // Save players
+        if (!this._onbMe) {
+            Toast.show('Please enter your name', 'error');
+            return;
+        }
+        if (this._onbPlayers.length < 1) {
+            Toast.show('Add at least 1 other player', 'error');
+            return;
+        }
+
+        // Save all players including 'Me'
+        const allNames = [this._onbMe, ...this._onbPlayers];
         const existing = Store.getPlayers();
-        this._onbPlayers.forEach(name => {
+        allNames.forEach((name, i) => {
             if (!existing.find(p => p.name === name)) {
                 existing.push({
                     id: Utils.generateId(),
                     name,
                     skill: 'intermediate',
                     notes: '',
+                    isMe: i === 0,
                     createdAt: new Date().toISOString()
                 });
             }
         });
         Store.savePlayers(existing);
-        Toast.show(`${this._onbPlayers.length} players added!`, 'success');
+
+        // Save 'Me' for profile
+        Store._set('myName', this._onbMe);
+
+        Toast.show(`Let's play, ${this._onbMe}!`, 'success');
+        Auth.initDefaultPlayers();
+        UI.updateUserUI();
         Router.navigate('dashboard');
     },
 
     // ===== DASHBOARD =====
     renderDashboard() {
         // Hero greeting
-        document.getElementById('dashboard-greeting').textContent = 'Player';
+        const myName = Store._getSingle('myName') || 'Player';
+        document.getElementById('dashboard-greeting').textContent = myName;
 
         // Hero avatar
         const heroAvatar = document.getElementById('dash-hero-avatar');
         if (heroAvatar) {
-            heroAvatar.textContent = 'K';
-            heroAvatar.style.background = Utils.getAvatarColor('Korts');
+            heroAvatar.textContent = Utils.getInitials(myName);
+            heroAvatar.style.background = Utils.getAvatarColor(myName);
         }
 
         // Stats — all data (no user filter)
@@ -3081,6 +3112,9 @@ const Events = {
                 Router.navigate('setup');
             }
         });
+
+        // Onboarding — Your Name
+        document.getElementById('onb-me-input')?.addEventListener('input', () => UI.setOnbMe());
 
         // Onboarding — Add player
         document.getElementById('onb-add-player')?.addEventListener('click', () => UI.addOnbPlayer());
