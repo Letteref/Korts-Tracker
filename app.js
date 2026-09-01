@@ -1885,9 +1885,17 @@ const UI = {
         const user = Auth.currentUser;
         if (!user) return;
 
-        document.getElementById('dashboard-greeting').textContent = `Welcome back, ${user.displayName}!`;
+        // Hero greeting
+        document.getElementById('dashboard-greeting').textContent = user.displayName;
 
-        // Quick stats
+        // Hero avatar
+        const heroAvatar = document.getElementById('dash-hero-avatar');
+        if (heroAvatar) {
+            heroAvatar.textContent = Utils.getInitials(user.displayName);
+            heroAvatar.style.background = Utils.getAvatarColor(user.displayName);
+        }
+
+        // Stats
         const matches = Store.getMatches().filter(m => m.userId === user.id);
         const tournaments = Store.getTournaments().filter(t => t.userId === user.id);
         const players = Store.getPlayers();
@@ -3037,6 +3045,18 @@ const Events = {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.sport-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
+            });
+        });
+
+        // Dashboard sport pills
+        document.querySelectorAll('.dash-sport-pill').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.dash-sport-pill').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                // Sync with header sport toggle
+                document.querySelectorAll('.sport-btn').forEach(b => {
+                    b.classList.toggle('active', b.dataset.sport === btn.dataset.dashSport);
+                });
             });
         });
 

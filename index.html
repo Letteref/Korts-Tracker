@@ -135,98 +135,115 @@
 
         <!-- ===== SCREEN: DASHBOARD ===== -->
         <div id="screen-dashboard" class="main-screen">
-            <div class="dashboard-container">
-                <div class="dashboard-hero">
-                    <h2 id="dashboard-greeting">Welcome back!</h2>
-                    <p class="dashboard-subtitle">Ready to play?</p>
+            <!-- Hero Banner -->
+            <div class="dash-hero">
+                <div class="dash-hero-bg"></div>
+                <div class="dash-hero-content">
+                    <div class="dash-hero-top">
+                        <div>
+                            <p class="dash-hero-tag">Welcome back</p>
+                            <h1 class="dash-hero-name" id="dashboard-greeting">Player</h1>
+                        </div>
+                        <div class="dash-hero-avatar" id="dash-hero-avatar"></div>
+                    </div>
+                    <div class="dash-hero-stats">
+                        <div class="dash-hero-stat">
+                            <span class="dash-hero-stat-val" id="stat-matches-played">0</span>
+                            <span class="dash-hero-stat-label">Matches</span>
+                        </div>
+                        <div class="dash-hero-stat-divider"></div>
+                        <div class="dash-hero-stat">
+                            <span class="dash-hero-stat-val" id="stat-tournaments-won">0</span>
+                            <span class="dash-hero-stat-label">Titles</span>
+                        </div>
+                        <div class="dash-hero-stat-divider"></div>
+                        <div class="dash-hero-stat">
+                            <span class="dash-hero-stat-val" id="stat-players-count">0</span>
+                            <span class="dash-hero-stat-label">Players</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dash-body">
+                <!-- Sport Toggle -->
+                <div class="dash-sport-row">
+                    <button class="dash-sport-pill active" data-dash-sport="tennis">
+                        <span>🎾</span> Tennis
+                    </button>
+                    <button class="dash-sport-pill" data-dash-sport="padel">
+                        <span>🏓</span> Padel
+                    </button>
                 </div>
 
-                <!-- Quick Stats -->
-                <div class="quick-stats" id="dashboard-quick-stats">
-                    <div class="stat-mini-card">
-                        <i data-lucide="trophy"></i>
-                        <div>
-                            <span class="stat-value" id="stat-matches-played">0</span>
-                            <span class="stat-label">Matches</span>
+                <!-- Quick Actions Grid -->
+                <h3 class="dash-section-title">Quick Actions</h3>
+                <div class="dash-actions-grid">
+                    <div class="dash-action-card dash-action-primary" id="mode-new-match">
+                        <div class="dash-action-icon"><i data-lucide="swords"></i></div>
+                        <div class="dash-action-text">
+                            <h3>New Match</h3>
+                            <p>Singles or doubles</p>
                         </div>
+                        <i data-lucide="chevron-right" class="dash-action-arrow"></i>
                     </div>
-                    <div class="stat-mini-card">
-                        <i data-lucide="medal"></i>
-                        <div>
-                            <span class="stat-value" id="stat-tournaments-won">0</span>
-                            <span class="stat-label">Tournaments Won</span>
+                    <div class="dash-action-card" id="mode-tournament">
+                        <div class="dash-action-icon"><i data-lucide="trophy"></i></div>
+                        <div class="dash-action-text">
+                            <h3>Tournament</h3>
+                            <p>Bracket competition</p>
                         </div>
+                        <i data-lucide="chevron-right" class="dash-action-arrow"></i>
                     </div>
-                    <div class="stat-mini-card">
-                        <i data-lucide="users"></i>
-                        <div>
-                            <span class="stat-value" id="stat-players-count">0</span>
-                            <span class="stat-label">Players</span>
+                    <div class="dash-action-card" id="mode-group-play">
+                        <div class="dash-action-icon"><i data-lucide="users"></i></div>
+                        <div class="dash-action-text">
+                            <h3>Group Play</h3>
+                            <p>King of the court</p>
                         </div>
+                        <i data-lucide="chevron-right" class="dash-action-arrow"></i>
                     </div>
                 </div>
 
                 <!-- Club Card -->
-                <div id="dashboard-club-card" class="club-overview-card hidden">
-                    <div class="club-card-header">
-                        <div class="club-avatar" id="club-card-avatar"></div>
+                <div id="dashboard-club-card" class="dash-club-card hidden">
+                    <div class="dash-club-left">
+                        <div class="dash-club-avatar" id="club-card-avatar"></div>
                         <div>
-                            <h3 id="club-card-name">Club Name</h3>
+                            <h4 id="club-card-name">Club Name</h4>
                             <p id="club-card-members">0 members</p>
                         </div>
                     </div>
-                    <div class="club-card-actions">
-                        <button class="btn btn-primary btn-sm" id="btn-club-quick-match">
-                            <i data-lucide="play"></i> Start Club Match
-                        </button>
-                        <button class="btn btn-ghost btn-sm" id="btn-club-dashboard">
-                            <i data-lucide="arrow-right"></i> View Club
-                        </button>
-                    </div>
+                    <button class="btn btn-primary btn-sm" id="btn-club-quick-match">
+                        <i data-lucide="play"></i> Play
+                    </button>
                 </div>
 
-                <!-- Resume Cards -->
+                <!-- Resume -->
                 <div id="dashboard-resume" class="hidden">
-                    <h3 class="section-title"><i data-lucide="rotate-ccw"></i> Resume</h3>
+                    <h3 class="dash-section-title"><i data-lucide="rotate-ccw"></i> Resume</h3>
                     <div id="resume-cards" class="resume-cards"></div>
-                </div>
-
-                <!-- Mode Cards -->
-                <h3 class="section-title">Start Playing</h3>
-                <div class="mode-cards">
-                    <div class="mode-card" id="mode-new-match">
-                        <div class="mode-card-icon"><i data-lucide="swords"></i></div>
-                        <h3>New Match</h3>
-                        <p>Quick singles or doubles match</p>
-                    </div>
-                    <div class="mode-card" id="mode-tournament">
-                        <div class="mode-card-icon"><i data-lucide="trophy"></i></div>
-                        <h3>Tournament</h3>
-                        <p>Set up a bracket competition</p>
-                    </div>
-                    <div class="mode-card" id="mode-group-play">
-                        <div class="mode-card-icon"><i data-lucide="users"></i></div>
-                        <h3>Group Play</h3>
-                        <p>King of the court rotation</p>
-                    </div>
                 </div>
 
                 <!-- Last Match -->
                 <div id="dashboard-last-match" class="hidden">
-                    <h3 class="section-title"><i data-lucide="clock"></i> Last Match</h3>
-                    <div id="last-match-card" class="last-match-card"></div>
+                    <h3 class="dash-section-title"><i data-lucide="clock"></i> Last Match</h3>
+                    <div id="last-match-card" class="dash-last-card"></div>
                 </div>
 
-                <!-- Quick Nav -->
-                <div class="quick-nav">
-                    <button class="quick-nav-btn" id="nav-players">
-                        <i data-lucide="user-cog"></i> Players
+                <!-- Bottom Nav Grid -->
+                <div class="dash-bottom-grid">
+                    <button class="dash-bottom-btn" id="nav-players">
+                        <i data-lucide="user-cog"></i>
+                        <span>Players</span>
                     </button>
-                    <button class="quick-nav-btn" id="nav-history">
-                        <i data-lucide="clock"></i> History
+                    <button class="dash-bottom-btn" id="nav-history">
+                        <i data-lucide="clock"></i>
+                        <span>History</span>
                     </button>
-                    <button class="quick-nav-btn" id="nav-clubs">
-                        <i data-lucide="building-2"></i> Clubs
+                    <button class="dash-bottom-btn" id="nav-clubs">
+                        <i data-lucide="building-2"></i>
+                        <span>Clubs</span>
                     </button>
                 </div>
             </div>
