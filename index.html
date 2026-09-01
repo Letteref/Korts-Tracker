@@ -815,13 +815,36 @@
                         <p class="form-help" id="group-player-count">0 players selected (need at least 3)</p>
                     </div>
                     <div class="form-group">
-                        <label>Time Per Match</label>
-                        <div class="sport-selector">
-                            <button class="sport-select-btn" data-group-time="60">1 min</button>
-                            <button class="sport-select-btn" data-group-time="120">2 min</button>
-                            <button class="sport-select-btn active" data-group-time="180">3 min</button>
-                            <button class="sport-select-btn" data-group-time="300">5 min</button>
+                        <label>Total Session Time</label>
+                        <div class="gp-time-row">
+                            <div class="sport-selector gp-time-presets">
+                                <button class="sport-select-btn" data-group-total="600">10 min</button>
+                                <button class="sport-select-btn" data-group-total="900">15 min</button>
+                                <button class="sport-select-btn active" data-group-total="1800">30 min</button>
+                                <button class="sport-select-btn" data-group-total="3600">60 min</button>
+                            </div>
+                            <div class="gp-custom-time">
+                                <label class="form-label-sm">Custom (min)</label>
+                                <input type="number" id="group-total-custom" min="1" max="480" placeholder="min">
+                            </div>
                         </div>
+                        <p class="form-help" id="group-total-display">Total: 30 minutes</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Match Time Per Rotation</label>
+                        <div class="gp-time-row">
+                            <div class="sport-selector gp-time-presets">
+                                <button class="sport-select-btn" data-group-time="60">1 min</button>
+                                <button class="sport-select-btn active" data-group-time="120">2 min</button>
+                                <button class="sport-select-btn" data-group-time="180">3 min</button>
+                                <button class="sport-select-btn" data-group-time="300">5 min</button>
+                            </div>
+                            <div class="gp-custom-time">
+                                <label class="form-label-sm">Custom (sec)</label>
+                                <input type="number" id="group-time-custom" min="30" max="600" step="30" placeholder="sec">
+                            </div>
+                        </div>
+                        <p class="form-help" id="group-time-display">Auto-calculated: fair time per player</p>
                     </div>
                     <div class="form-group">
                         <label>Rotation Mode</label>
@@ -834,8 +857,8 @@
                     <div class="form-group">
                         <label>End Session When</label>
                         <div class="sport-selector">
-                            <button class="sport-select-btn active" data-group-end="timer">Timer (15 min)</button>
-                            <button class="sport-select-btn" data-group-end="wins">A Player Reaches 5 Wins</button>
+                            <button class="sport-select-btn active" data-group-end="timer">Timer Expired</button>
+                            <button class="sport-select-btn" data-group-end="wins">A Player Reaches X Wins</button>
                         </div>
                     </div>
                     <button class="btn btn-primary btn-lg btn-full" id="btn-start-group">

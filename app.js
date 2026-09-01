@@ -2451,6 +2451,15 @@ const UI = {
             </div>
         `).join('');
         this.updateGroupPlayerCount();
+        // Initialize time display
+        setTimeout(() => {
+            const display = document.getElementById('group-total-display');
+            if (display && !display._initialized) {
+                display._initialized = true;
+                document.getElementById('group-total-display').textContent = 'Total: 30 minutes';
+                document.getElementById('group-time-display').textContent = 'Auto-calculated: fair time per player';
+            }
+        }, 100);
     },
 
     updateGroupPlayerCount() {
@@ -2468,9 +2477,28 @@ const UI = {
         const selectedPlayers = playerIds.map(id => allPlayers.find(p => p.id === id)).filter(Boolean);
 
         const sport = document.querySelector('[data-group-sport].active')?.dataset.groupSport || 'tennis';
-        const matchTime = parseInt(document.querySelector('[data-group-time].active')?.dataset.groupTime || '180');
         const rotation = document.querySelector('[data-group-rotation].active')?.dataset.groupRotation || 'winner-stays';
         const endMode = document.querySelector('[data-group-end].active')?.dataset.groupEnd || 'timer';
+
+        // Total session time: custom input or preset
+        const totalCustom = parseInt(document.getElementById('group-total-custom')?.value);
+        const totalPreset = parseInt(document.querySelector('[data-group-total].active')?.dataset.groupTotal);
+        const totalSessionTime = totalCustom > 0 ? totalCustom * 60 : (totalPreset || 1800);
+
+        // Match time per rotation: custom input or preset
+        const timeCustom = parseInt(document.getElementById('group-time-custom')?.value);
+        const timePreset = parseInt(document.querySelector('[data-group-time].active')?.dataset.groupTime);
+        let matchTime = timeCustom > 0 ? timeCustom : (timePreset || 120);
+
+        // Auto-calculate fair match time if no custom match time set
+        const numPlayers = selectedPlayers.length;
+        if (!timeCustom && !timePreset) {
+            // Default: divide total time by estimated rotations (2 players per match)
+            // Assume each player should get roughly equal court time
+            const estimatedMatches = Math.ceil(numPlayers * 1.5);
+            matchTime = Math.floor(totalSessionTime / estimatedMatches);
+            matchTime = Math.max(60, Math.min(300, matchTime)); // Clamp between 1-5 min
+        }
 
         GroupPlay.startSession({
             sport,
@@ -2478,7 +2506,7 @@ const UI = {
             matchTime,
             rotationMode: rotation,
             endMode,
-            endTimer: endMode === 'timer' ? 900 : null,
+            endTimer: endMode === 'timer' ? totalSessionTime : null,
             endWins: endMode === 'wins' ? 5 : null
         });
     },
@@ -3189,6 +3217,58 @@ const Events = {
         document.getElementById('btn-share-tournament')?.addEventListener('click', () => {
             document.getElementById('champion-overlay').classList.add('hidden');
             UI.shareFromComplete('tournament');
+        });
+
+        // Group play time config
+        const updateGroupTimeDisplay = () => {
+            const totalCustom = parseInt(document.getElementById('group-total-custom')?.value);
+            const totalPreset = parseInt(document.querySelector('[data-group-total].active')?.dataset.groupTotal);
+            const totalTime = totalCustom > 0 ? totalCustom * 60 : (totalPreset || 1800);
+
+            const timeCustom = parseInt(document.getElementById('group-time-custom')?.value);
+            const timePreset = parseInt(document.querySelector('[data-group-time].active')?.dataset.groupTime);
+            const matchTime = timeCustom > 0 ? timeCustom : (timePreset || 120);
+
+            const playerCount = document.querySelectorAll('#group-player-grid .selected').length || 4;
+            const fairTime = Math.floor(totalTime / (playerCount * 1.5));
+            const fairMatchTime = Math.max(60, Math.min(300, fairTime));
+
+            const totalMin = Math.floor(totalTime / 60);
+            document.getElementById('group-total-display').textContent = `Total: ${totalMin} minutes`;
+
+            if (!timeCustom && !timePreset) {
+                document.getElementById('group-time-display').textContent = `Auto: ${fairMatchTime}s per match (${playerCount} players) — fair court time`;
+            } else {
+                const matchMin = Math.floor(matchTime / 60);
+                const matchSec = matchTime % 60;
+                const matchStr = matchMin > 0 ? `${matchMin}m ${matchSec}s` : `${matchSec}s`;
+                document.getElementById('group-time-display').textContent = `Match time: ${matchStr} per rotation`;
+            }
+        };
+
+        // Preset buttons for total time
+        document.querySelectorAll('[data-group-total]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('group-total-custom').value = '';
+                updateGroupTimeDisplay();
+            });
+        });
+
+        // Preset buttons for match time
+        document.querySelectorAll('[data-group-time]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('group-time-custom').value = '';
+                updateGroupTimeDisplay();
+            });
+        });
+
+        // Custom time inputs
+        document.getElementById('group-total-custom')?.addEventListener('input', updateGroupTimeDisplay);
+        document.getElementById('group-time-custom')?.addEventListener('input', updateGroupTimeDisplay);
+
+        // Update when players are selected/deselected
+        document.getElementById('group-player-grid')?.addEventListener('click', () => {
+            setTimeout(updateGroupTimeDisplay, 50);
         });
 
         // Group play

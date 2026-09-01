@@ -1714,6 +1714,37 @@ input::placeholder, textarea::placeholder {
     font-style: italic;
 }
 
+/* ===== GROUP PLAY TIME CONFIG ===== */
+.gp-time-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.gp-time-presets {
+    flex: 1;
+}
+
+.gp-custom-time {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 80px;
+}
+
+.gp-custom-time input {
+    padding: 8px 10px;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.form-label-sm {
+    font-size: 0.65rem !important;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
 /* ===== GROUP PLAY ===== */
 .group-play-container {
     max-width: 900px;
