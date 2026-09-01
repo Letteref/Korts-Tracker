@@ -3474,41 +3474,37 @@ const Events = {
         const qaBtn = document.getElementById('quick-action-btn');
         const qaPopup = document.getElementById('quick-action-popup');
         const qaOverlay = document.getElementById('quick-action-overlay');
+
+        function closeQAPopup() {
+            if (qaPopup) qaPopup.classList.remove('visible');
+            if (qaOverlay) qaOverlay.classList.remove('visible');
+            if (qaBtn) qaBtn.classList.remove('open');
+        }
+
+        function openQAPopup() {
+            if (qaPopup) qaPopup.classList.add('visible');
+            if (qaOverlay) qaOverlay.classList.add('visible');
+            if (qaBtn) qaBtn.classList.add('open');
+        }
+
         if (qaBtn) {
-            qaBtn.addEventListener('click', () => {
-                SFX.resume();
-                const isOpen = qaPopup.classList.contains('visible');
+            qaBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isOpen = qaPopup && qaPopup.classList.contains('visible');
                 if (isOpen) {
-                    SFX.close();
-                    SFX.haptic(10);
-                    qaPopup.classList.remove('visible');
-                    qaOverlay.classList.remove('visible');
-                    qaBtn.classList.remove('open');
+                    closeQAPopup();
                 } else {
-                    SFX.pop();
-                    SFX.haptic(15);
-                    qaPopup.classList.add('visible');
-                    qaOverlay.classList.add('visible');
-                    qaBtn.classList.add('open');
+                    openQAPopup();
                 }
             });
         }
         if (qaOverlay) {
-            qaOverlay.addEventListener('click', () => {
-                SFX.close();
-                SFX.haptic(10);
-                qaPopup.classList.remove('visible');
-                qaOverlay.classList.remove('visible');
-                qaBtn.classList.remove('open');
-            });
+            qaOverlay.addEventListener('click', () => closeQAPopup());
         }
         document.querySelectorAll('.qap-option').forEach(opt => {
-            opt.addEventListener('click', () => {
-                SFX.select();
-                SFX.haptic(20);
-                qaPopup.classList.remove('visible');
-                qaOverlay.classList.remove('visible');
-                qaBtn.classList.remove('open');
+            opt.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeQAPopup();
                 const action = opt.dataset.action;
                 const mode = opt.dataset.mode;
                 if (action === 'match-setup' && mode) {
@@ -3518,6 +3514,22 @@ const Events = {
                 Router.navigate(action);
             });
         });
+
+        // Close QA popup on outside click
+        document.addEventListener('click', (e) => {
+            if (qaPopup && qaPopup.classList.contains('visible')) {
+                if (!e.target.closest('#quick-action-btn') && !e.target.closest('#quick-action-popup')) {
+                    closeQAPopup();
+                }
+            }
+        });
+
+        // Close QA popup on scroll
+        window.addEventListener('scroll', () => {
+            if (qaPopup && qaPopup.classList.contains('visible')) {
+                closeQAPopup();
+            }
+        }, { passive: true });
 
         // Sport toggle (header)
         document.querySelectorAll('.sport-btn').forEach(btn => {
