@@ -358,118 +358,133 @@ input::placeholder, textarea::placeholder {
     50% { transform: translateY(-20px) rotate(15deg); }
 }
 
-/* Content */
-.welcome-content {
+/* ===== NIKE RUN CLUB STYLE ===== */
+.nrc-welcome {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #000;
+}
+
+.nrc-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 40%, #0d3328 0%, #071a12 50%, #000 100%);
+}
+
+.nrc-content {
     position: relative;
     z-index: 1;
-    text-align: center;
-    padding: 40px 24px;
-    width: 100%;
-    max-width: 420px;
-}
-
-/* Brand — logo + name side by side */
-.welcome-brand {
+    flex: 1;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-    margin-bottom: 8px;
+    flex-direction: column;
+    padding: 24px;
 }
 
-.welcome-logo {
-    width: 52px;
-    height: 52px;
+/* Top — minimal logo */
+.nrc-top {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.nrc-logo {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), #16a34a);
+    background: var(--accent);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 28px rgba(34, 197, 94, 0.35), 0 0 60px rgba(34, 197, 94, 0.12);
-    flex-shrink: 0;
-    animation: logoPulse 3s ease-in-out infinite;
 }
 
-@keyframes logoPulse {
-    0%, 100% { box-shadow: 0 8px 28px rgba(34, 197, 94, 0.35), 0 0 60px rgba(34, 197, 94, 0.12); }
-    50% { box-shadow: 0 8px 28px rgba(34, 197, 94, 0.5), 0 0 80px rgba(34, 197, 94, 0.2); }
-}
-
-.welcome-logo svg {
-    width: 26px;
-    height: 26px;
+.nrc-logo svg {
+    width: 20px;
+    height: 20px;
     color: #000;
 }
 
-.welcome-name {
-    font-size: 2.8rem;
+/* Center — big headline */
+.nrc-center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding-bottom: 20px;
+}
+
+.nrc-headline {
+    font-size: 4rem;
     font-weight: 900;
-    letter-spacing: 3px;
+    letter-spacing: 2px;
     color: #fff;
-    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    line-height: 1;
+    margin-bottom: 12px;
 }
 
-.welcome-tagline {
-    font-size: 0.95rem;
-    color: rgba(255, 255, 255, 0.45);
-    font-style: italic;
-    margin-bottom: 40px;
-    letter-spacing: 0.3px;
+.nrc-sub {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.4);
+    line-height: 1.5;
+    font-weight: 400;
 }
 
-.welcome-cta {
+/* Bottom — CTA + footnote */
+.nrc-bottom {
+    padding-bottom: 16px;
+}
+
+.nrc-cta {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
+    justify-content: space-between;
     width: 100%;
-    padding: 18px 32px;
+    padding: 18px 24px;
     background: var(--accent);
     color: #000;
     border: none;
     border-radius: 60px;
     font-family: var(--font);
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 800;
     cursor: pointer;
     transition: all var(--transition);
-    box-shadow: 0 8px 30px rgba(34, 197, 94, 0.4);
 }
 
-.welcome-cta:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(34, 197, 94, 0.5);
+.nrc-cta:hover {
+    background: var(--accent-hover);
 }
 
-.welcome-cta:active {
-    transform: scale(0.97);
+.nrc-cta:active {
+    transform: scale(0.98);
 }
 
-.welcome-cta svg {
-    width: 22px;
-    height: 22px;
+.nrc-cta svg {
+    width: 20px;
+    height: 20px;
 }
 
-.welcome-footnote {
-    margin-top: 16px;
+.nrc-footnote {
+    margin-top: 12px;
     font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.2);
+    text-align: center;
 }
 
 /* Credit */
-.welcome-credit {
-    position: absolute;
-    bottom: 24px;
-    left: 0;
-    right: 0;
-    text-align: center;
-    font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.2);
+.nrc-credit {
+    position: relative;
     z-index: 1;
+    text-align: center;
+    padding: 16px 24px;
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.18);
 }
 
-.welcome-credit strong {
-    color: rgba(255, 255, 255, 0.35);
+.nrc-credit strong {
+    color: rgba(255, 255, 255, 0.3);
     font-weight: 600;
 }
 
