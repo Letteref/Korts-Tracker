@@ -2283,11 +2283,28 @@ const UI = {
             const el = document.getElementById(`${prefix}-${id}`);
             if (el) {
                 el.innerHTML = options;
-                // Remove selected from other
                 if (id !== 'p1' && id !== 'p1-d2') {
                     el.selectedIndex = Math.min(1, players.length - 1);
                 }
             }
+        });
+        // Disable duplicate selections
+        this.updateDuplicatePlayers();
+    },
+
+    updateDuplicatePlayers() {
+        const selects = ['pick-p1', 'pick-p1-d2', 'pick-p2', 'pick-p2-d2'];
+        const selectedIds = selects.map(id => document.getElementById(id)?.value).filter(Boolean);
+
+        selects.forEach(selectId => {
+            const el = document.getElementById(selectId);
+            if (!el) return;
+            const currentVal = el.value;
+            Array.from(el.options).forEach(opt => {
+                // Disable if selected in another dropdown (but not this one)
+                const isSelectedElsewhere = selectedIds.includes(opt.value) && opt.value !== currentVal;
+                opt.disabled = isSelectedElsewhere;
+            });
         });
     },
 
@@ -2311,6 +2328,19 @@ const UI = {
 
         if (!p1 || !p2) { Toast.show('Please select both players', 'error'); return; }
         if (p1Id === p2Id) { Toast.show('Please select different players', 'error'); return; }
+
+        // Doubles validation — check for duplicates
+        const isDoubles = document.querySelector('[data-setup-mode].active')?.dataset.setupMode === 'doubles';
+        if (isDoubles) {
+            const p1d2Id = document.getElementById('pick-p1-d2')?.value;
+            const p2d2Id = document.getElementById('pick-p2-d2')?.value;
+            const allIds = [p1Id, p2Id, p1d2Id, p2d2Id].filter(Boolean);
+            const uniqueIds = new Set(allIds);
+            if (allIds.length !== uniqueIds.size) {
+                Toast.show('Each player can only be in one team', 'error');
+                return;
+            }
+        }
 
         const activeSportBtn = document.querySelector('[data-setup-sport].active');
         const activeModeBtn = document.querySelector('[data-setup-mode].active');
@@ -3330,8 +3360,11 @@ const Events = {
         });
 
         // Player selects → update first server
-        ['pick-p1', 'pick-p2'].forEach(id => {
-            document.getElementById(id)?.addEventListener('change', () => UI.updateFirstServerOptions());
+        ['pick-p1', 'pick-p2', 'pick-p1-d2', 'pick-p2-d2'].forEach(id => {
+            document.getElementById(id)?.addEventListener('change', () => {
+                UI.updateFirstServerOptions();
+                UI.updateDuplicatePlayers();
+            });
         });
 
         // Players
