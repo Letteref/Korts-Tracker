@@ -2530,6 +2530,10 @@ input::placeholder, textarea::placeholder {
 }
 
 /* ===== PLAYER ROSTER ===== */
+.players-container .search-box {
+    margin-bottom: 16px;
+}
+
 .player-roster {
     padding: 0 20px;
     display: grid;
