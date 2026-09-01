@@ -2095,6 +2095,15 @@ const UI = {
             resumeDiv.classList.add('hidden');
         }
 
+        // Restore saved sport selection
+        const savedSport = Store._getSingle('selectedSport') || 'tennis';
+        document.querySelectorAll('.dash-sport-pill').forEach(p => {
+            p.classList.toggle('active', p.dataset.dashSport === savedSport);
+        });
+        document.querySelectorAll('.sport-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.sport === savedSport);
+        });
+
         // Last match
         const lastMatch = matches[0];
         const lastMatchDiv = document.getElementById('dashboard-last-match');
@@ -3210,6 +3219,12 @@ const Events = {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.sport-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
+                // Sync with dashboard sport pills
+                document.querySelectorAll('.dash-sport-pill').forEach(p => {
+                    p.classList.toggle('active', p.dataset.dashSport === btn.dataset.sport);
+                });
+                // Save selected sport
+                Store._set('selectedSport', btn.dataset.sport);
             });
         });
 
@@ -3222,6 +3237,8 @@ const Events = {
                 document.querySelectorAll('.sport-btn').forEach(b => {
                     b.classList.toggle('active', b.dataset.sport === btn.dataset.dashSport);
                 });
+                // Save selected sport
+                Store._set('selectedSport', btn.dataset.dashSport);
             });
         });
 
