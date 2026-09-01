@@ -1866,14 +1866,15 @@ const UI = {
     },
 
     updateUserUI() {
-        // No auth — show default player avatar
+        const myName = Store._getSingle('myName') || 'Player';
+
+        // Header avatar — show user initials
         const avatar = document.getElementById('user-avatar');
         if (avatar) {
-            avatar.textContent = 'K';
-            avatar.style.background = Utils.getAvatarColor('Korts');
+            avatar.textContent = Utils.getInitials(myName);
+            avatar.style.background = Utils.getAvatarColor(myName);
         }
 
-        const myName = Store._getSingle('myName') || 'Player';
         document.getElementById('dropdown-displayname').textContent = myName;
         document.getElementById('dropdown-role').textContent = 'player';
         document.getElementById('dropdown-role').className = 'badge badge-member';
