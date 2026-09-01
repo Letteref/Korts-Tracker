@@ -253,107 +253,76 @@ const Auth = {
 };
 
 // ============================================================
-// SOUND & HAPTIC FEEDBACK
+// SOUND & HAPTIC FEEDBACK (Mixkit Audio Library)
 // ============================================================
 const SFX = {
-    ctx: null,
+    _volume: 0.5,
+    _pool: {},
 
-    getCtx() {
-        if (!this.ctx) {
-            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    // Mixkit sound URLs — https://mixkit.co/free-sound-effects/
+    _urls: {
+        click:    'https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-click-1107.mp3',
+        pop:      'https://assets.mixkit.co/sfx/preview/mixkit-magic-pop-932.mp3',
+        close:    'https://assets.mixkit.co/sfx/preview/mixkit-plastic-bubble-click-press-2845.mp3',
+        select:   'https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3',
+        point:    'https://assets.mixkit.co/sfx/preview/mixkit-game-ball-tap-2073.mp3',
+        gameWin:  'https://assets.mixkit.co/sfx/preview/mixkit-game-level-completed-2059.mp3',
+        matchWin: 'https://assets.mixkit.co/sfx/preview/mixkit-stadium-crowd-light-applause-362.mp3',
+        whistle:  'https://assets.mixkit.co/sfx/preview/mixkit-police-short-whistle-1946.mp3',
+        notify:   'https://assets.mixkit.co/sfx/preview/mixkit-retro-game-notification-212.mp3',
+        error:    'https://assets.mixkit.co/sfx/preview/mixkit-click-error-1113.mp3',
+        coin:     'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3',
+    },
+
+    // Create or reuse an Audio element
+    _get(name) {
+        if (!this._urls[name]) return null;
+        if (!this._pool[name]) {
+            const audio = new Audio(this._urls[name]);
+            audio.preload = 'auto';
+            audio.volume = this._volume;
+            this._pool[name] = audio;
         }
-        return this.ctx;
+        return this._pool[name];
     },
 
-    // Resume context on first user interaction (required by browsers)
-    resume() {
-        if (this.ctx && this.ctx.state === 'suspended') {
-            this.ctx.resume();
-        }
-    },
-
-    // Short click — FAB toggle
-    click() {
+    // Play a sound by name (clones for overlapping)
+    play(name, vol) {
         try {
-            const ctx = this.getCtx();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.frequency.setValueAtTime(800, ctx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.05);
-            gain.gain.setValueAtTime(0.15, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
-            osc.start(ctx.currentTime);
-            osc.stop(ctx.currentTime + 0.08);
+            const base = this._get(name);
+            if (!base) return;
+            // Clone for simultaneous plays
+            const audio = base.cloneNode();
+            audio.volume = vol !== undefined ? vol : this._volume;
+            audio.play().catch(() => {});
         } catch (e) {}
     },
 
-    // Pop sound — popup open
-    pop() {
-        try {
-            const ctx = this.getCtx();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(600, ctx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(1400, ctx.currentTime + 0.06);
-            osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.12);
-            gain.gain.setValueAtTime(0.18, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
-            osc.start(ctx.currentTime);
-            osc.stop(ctx.currentTime + 0.12);
-        } catch (e) {}
-    },
-
-    // Soft close
-    close() {
-        try {
-            const ctx = this.getCtx();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(600, ctx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.1);
-            gain.gain.setValueAtTime(0.1, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
-            osc.start(ctx.currentTime);
-            osc.stop(ctx.currentTime + 0.1);
-        } catch (e) {}
-    },
-
-    // Success ding — option select
-    select() {
-        try {
-            const ctx = this.getCtx();
-            const t = ctx.currentTime;
-            // Two-tone ding
-            [880, 1320].forEach((freq, i) => {
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(freq, t + i * 0.08);
-                gain.gain.setValueAtTime(0, t);
-                gain.gain.linearRampToValueAtTime(0.2, t + i * 0.08);
-                gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.08 + 0.15);
-                osc.start(t + i * 0.08);
-                osc.stop(t + i * 0.08 + 0.15);
-            });
-        } catch (e) {}
-    },
+    // Convenience methods
+    click()   { this.play('click'); },
+    pop()     { this.play('pop'); },
+    close()   { this.play('close'); },
+    select()  { this.play('select'); },
+    point()   { this.play('point'); },
+    gameWin() { this.play('gameWin'); },
+    matchWin(){ this.play('matchWin', 0.7); },
+    whistle() { this.play('whistle'); },
+    notify()  { this.play('notify'); },
+    error()   { this.play('error'); },
+    coin()    { this.play('coin'); },
 
     // Haptic feedback
     haptic(ms) {
         try {
             if (navigator.vibrate) navigator.vibrate(ms);
         } catch (e) {}
-    }
+    },
+
+    // Vibration patterns
+    vibratePoint()  { this.haptic(15); },
+    vibrateGame()   { this.haptic([30, 50, 30]); },
+    vibrateMatch()  { this.haptic([50, 80, 50, 80, 100]); },
+    vibrateError()  { this.haptic([40, 60, 40]); },
 };
 
 // ============================================================
@@ -780,6 +749,7 @@ const MatchManager = {
         this.currentState = Scoring.createMatchState(config);
         this.elapsedSeconds = 0;
         this.startTimer();
+        SFX.whistle();
         Router.navigate('match');
     },
 
@@ -822,8 +792,17 @@ const MatchManager = {
         const result = Scoring.awardPoint(this.currentState, player);
         UI.renderMatch();
 
+        // Sound & haptic feedback
         if (result.type === 'match') {
+            SFX.matchWin();
+            SFX.vibrateMatch();
             this.completeMatch();
+        } else if (result.type === 'game' || result.type === 'set') {
+            SFX.gameWin();
+            SFX.vibrateGame();
+        } else {
+            SFX.point();
+            SFX.vibratePoint();
         }
     },
 
@@ -831,6 +810,8 @@ const MatchManager = {
         if (!this.currentState) return;
         if (Scoring.undo(this.currentState)) {
             UI.renderMatch();
+            SFX.error();
+            SFX.vibrateError();
             Toast.show('Point undone', 'info');
         }
     },
@@ -845,6 +826,8 @@ const MatchManager = {
         if (!this.currentState) return;
         const other = player === 'p1' ? 'p2' : 'p1';
         this.currentState.matchWinner = other;
+        SFX.matchWin();
+        SFX.vibrateMatch();
         this.completeMatch();
     },
 
@@ -1158,8 +1141,17 @@ const GroupPlay = {
         const result = Scoring.awardPoint(this.current.currentMatch.state, player);
         UI.renderGroupPlay();
 
+        // Sound & haptic feedback
         if (result.type === 'match') {
+            SFX.matchWin();
+            SFX.vibrateMatch();
             this.endCurrentMatch();
+        } else if (result.type === 'game' || result.type === 'set') {
+            SFX.gameWin();
+            SFX.vibrateGame();
+        } else {
+            SFX.point();
+            SFX.vibratePoint();
         }
     },
 
