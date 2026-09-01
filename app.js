@@ -1880,15 +1880,17 @@ const UI = {
 
     // ===== ONBOARDING =====
     renderOnboarding() {
-        this._onbMe = '';
+        // Pre-fill username if already saved
+        const savedName = Store._getSingle('myName') || '';
+        this._onbMe = savedName;
         this._onbPlayers = [];
         this._onbStep = 1;
         this.updateOnbStep();
         this.renderOnbList();
-        // Clear inputs
+        // Pre-fill inputs
         const meInput = document.getElementById('onb-me-input');
         const playerInput = document.getElementById('onb-player-input');
-        if (meInput) meInput.value = '';
+        if (meInput) meInput.value = savedName;
         if (playerInput) playerInput.value = '';
         // Update continue button state
         this.updateOnbContinueBtn();
@@ -3113,11 +3115,17 @@ const Events = {
         document.getElementById('btn-welcome-start')?.addEventListener('click', () => {
             Auth.initDefaultPlayers();
             UI.updateUserUI();
-            // Check if players already exist
+            // Check if username already saved
+            const myName = Store._getSingle('myName');
             const players = Store.getPlayers();
-            if (players.length >= 2) {
+            if (myName && players.length >= 2) {
+                // Already set up — go straight to dashboard
                 Router.navigate('dashboard');
+            } else if (myName && players.length < 2) {
+                // Has username but no players — go to onboarding with name pre-filled
+                Router.navigate('setup');
             } else {
+                // Fresh start — full onboarding
                 Router.navigate('setup');
             }
         });
