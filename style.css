@@ -930,6 +930,7 @@ input::placeholder, textarea::placeholder {
 }
 
 .sport-emoji { font-size: 0.9rem; }
+.sport-btn svg, .dash-sport-pill svg, .sport-select-btn svg { width: 16px; height: 16px; vertical-align: -2px; }
 
 /* User Menu */
 .user-menu { position: relative; }
@@ -2811,7 +2812,8 @@ input::placeholder, textarea::placeholder {
     background: var(--accent-dim);
 }
 
-.template-thumb { font-size: 1.2rem; }
+.template-thumb { font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
+.template-thumb svg { width: 24px; height: 24px; color: var(--accent); }
 
 .share-preview {
     display: flex;
@@ -3118,7 +3120,8 @@ input[type="color"] {
     border-color: var(--accent);
 }
 
-.qap-icon { font-size: 1.6rem; }
+.qap-icon { font-size: 1.6rem; display: flex; align-items: center; justify-content: center; }
+.qap-icon svg { width: 28px; height: 28px; color: var(--accent); }
 
 .qap-label {
     font-size: 0.85rem;

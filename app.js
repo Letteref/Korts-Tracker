@@ -11,6 +11,16 @@ const Utils = {
         return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
     },
 
+    // Lucide icon SVG helper
+    icon(name, size = 20) {
+        try {
+            if (lucide && lucide.icons && lucide.icons[name]) {
+                return lucide.icons[name].toSvg({ width: size, height: size });
+            }
+        } catch (e) {}
+        return '';
+    },
+
     async hashPassword(str) {
         const encoder = new TextEncoder();
         const data = encoder.encode(str);
@@ -2235,7 +2245,7 @@ const UI = {
             if (activeTourney) {
                 resumeCards.innerHTML += `
                     <div class="history-item" onclick="Tournament.current=Store.getActiveTournament();Router.navigate('tournament')">
-                        <div style="font-size:1.5rem">🏆</div>
+                        <div style="display:flex;align-items:center;justify-content:center;width:40px;height:40px;color:var(--accent)">${Utils.icon('trophy', 24)}</div>
                         <div class="history-item-info">
                             <div class="history-item-title">${Utils.escapeHtml(activeTourney.name)}</div>
                             <div class="history-item-detail">Tournament • In Progress</div>
@@ -2246,7 +2256,7 @@ const UI = {
             if (activeGroup) {
                 resumeCards.innerHTML += `
                     <div class="history-item" onclick="GroupPlay.current=Store.getActiveGroupSession();Router.navigate('group')">
-                        <div style="font-size:1.5rem">👥</div>
+                        <div style="display:flex;align-items:center;justify-content:center;width:40px;height:40px;color:var(--accent)">${Utils.icon('users', 24)}</div>
                         <div class="history-item-info">
                             <div class="history-item-title">Group Play Session</div>
                             <div class="history-item-detail">In Progress</div>
@@ -2276,7 +2286,7 @@ const UI = {
             const score = lastMatch.sets.map(s => `${s.p1 || 0}-${s.p2 || 0}`).join(', ');
             lastMatchCard.innerHTML = `
                 <div style="display:flex;align-items:center;gap:12px">
-                    <span style="font-size:1.5rem">${lastMatch.sport === 'tennis' ? '🎾' : '🏓'}</span>
+                    <span style="color:var(--accent);display:flex;align-items:center">${lastMatch.sport === 'tennis' ? Utils.icon('circle-dot', 24) : Utils.icon('disc', 24)}</span>
                     <div style="flex:1">
                         <div style="font-weight:700;font-size:0.9rem">${lastMatch.players.map(p => p.name).join(' vs ')}</div>
                         <div style="font-size:0.8rem;color:var(--text-secondary)">${score} • ${Utils.formatDate(lastMatch.timestamp)}</div>
@@ -2533,7 +2543,7 @@ const UI = {
         document.getElementById('sb-p2-server').classList.toggle('active', state.serving === 'p2');
 
         // Sport badge
-        document.getElementById('match-sport-badge').textContent = state.sport === 'tennis' ? '🎾 Tennis' : '🏓 Padel';
+        document.getElementById('match-sport-badge').innerHTML = (state.sport === 'tennis' ? Utils.icon('circle-dot', 16) : Utils.icon('disc', 16)) + ' ' + (state.sport === 'tennis' ? 'Tennis' : 'Padel');
 
         // Stats
         document.getElementById('stat-p1-points').textContent = state.stats.pointsWon.p1;
@@ -2561,7 +2571,7 @@ const UI = {
         overlay.classList.remove('hidden');
 
         document.getElementById('winner-name').textContent = `${match.winnerName} wins!`;
-        document.getElementById('winner-subtitle').textContent = match.sport === 'tennis' ? '🎾 Tennis Match' : '🏓 Padel Match';
+        document.getElementById('winner-subtitle').innerHTML = (match.sport === 'tennis' ? Utils.icon('circle-dot', 16) : Utils.icon('disc', 16)) + ' ' + (match.sport === 'tennis' ? 'Tennis Match' : 'Padel Match');
 
         const scoreDisplay = document.getElementById('final-score-display');
         scoreDisplay.innerHTML = match.sets
@@ -3153,7 +3163,7 @@ const UI = {
         container.innerHTML = matches.slice(0, 50).map(m => {
             const score = m.sets.filter(s => s.p1 || s.p2).map(s => `${s.p1 || 0}-${s.p2 || 0}`).join(', ');
             return `<div class="history-item" onclick="UI.shareMatch('${m.id}')">
-                <span style="font-size:1.5rem">${m.sport === 'tennis' ? '🎾' : '🏓'}</span>
+                <span style="color:var(--accent);display:flex;align-items:center">${m.sport === 'tennis' ? Utils.icon('circle-dot', 24) : Utils.icon('disc', 24)}</span>
                 <div class="history-item-info">
                     <div class="history-item-title">${m.players.map(p => Utils.escapeHtml(p.name)).join(' vs ')}</div>
                     <div class="history-item-detail">${score} • ${m.mode}</div>
@@ -3179,7 +3189,7 @@ const UI = {
 
         container.innerHTML = tournaments.map(t => `
             <div class="history-item">
-                <span style="font-size:1.5rem">🏆</span>
+                <span style="color:var(--accent);display:flex;align-items:center">${Utils.icon('trophy', 24)}</span>
                 <div class="history-item-info">
                     <div class="history-item-title">${Utils.escapeHtml(t.name)}</div>
                     <div class="history-item-detail">Champion: ${t.champion ? Utils.escapeHtml(t.champion.name) : 'TBD'} • ${t.matches?.filter(m => m.completed).length || 0} matches</div>
@@ -3198,7 +3208,7 @@ const UI = {
 
         container.innerHTML = sessions.map(s => `
             <div class="history-item">
-                <span style="font-size:1.5rem">👥</span>
+                <span style="color:var(--accent);display:flex;align-items:center">${Utils.icon('users', 24)}</span>
                 <div class="history-item-info">
                     <div class="history-item-title">Group Play • ${Utils.formatTime(s.duration)}</div>
                     <div class="history-item-detail">${s.totalMatches} matches • Winner: ${s.leaderboard?.[0] ? Utils.escapeHtml(s.leaderboard[0].name) : 'N/A'}</div>
