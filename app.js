@@ -2838,9 +2838,16 @@ const UI = {
     showGroupTransition(winner) {
         const overlay = document.getElementById('group-transition');
         overlay.classList.remove('hidden');
-        document.getElementById('transition-players').innerHTML =
-            `<span style="color:var(--accent)">${Utils.escapeHtml(winner.name)}</span> stays!`;
-
+        const rotation = GroupPlay.current?.rotationMode || 'winner-stays';
+        let msg = '';
+        if (rotation === 'winner-stays') {
+            msg = `<span style="color:var(--accent)">${Utils.escapeHtml(winner.name)}</span> stays!`;
+        } else if (rotation === 'loser-stays') {
+            msg = `<span style="color:var(--accent)">${Utils.escapeHtml(winner.name)}</span> wins! Next matchup incoming...`;
+        } else {
+            msg = `<span style="color:var(--accent)">Next matchup</span> — random draw!`;
+        }
+        document.getElementById('transition-players').innerHTML = msg;
         setTimeout(() => overlay.classList.add('hidden'), 2000);
     },
 
