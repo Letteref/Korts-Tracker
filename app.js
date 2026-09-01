@@ -3631,10 +3631,6 @@ const Events = {
             e.preventDefault();
             Router.navigate('profile');
         });
-        document.getElementById('dropdown-settings')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            Router.navigate('profile');
-        });
 
         // Data export/import
         document.getElementById('btn-export-data')?.addEventListener('click', () => UI.exportData());
