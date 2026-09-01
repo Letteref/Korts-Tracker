@@ -286,19 +286,19 @@ const Router = {
             this.currentScreen = screen;
         }
 
-        // Auth vs app container
-        if (screen === 'auth') {
-            document.getElementById('app-container').classList.add('hidden');
+        // Auth & onboarding are standalone screens (outside app-container)
+        const isStandalone = (screen === 'auth' || screen === 'setup');
+        const appContainer = document.getElementById('app-container');
+        if (isStandalone) {
+            appContainer.classList.add('hidden');
         } else {
-            document.getElementById('app-container').classList.remove('hidden');
+            appContainer.classList.remove('hidden');
         }
-
-        // Hide header & nav during onboarding
-        const isOnboarding = screen === 'setup';
+        // Always show header & nav when entering app
         const header = document.getElementById('app-header');
         const bottomNav = document.getElementById('bottom-nav');
-        if (header) header.style.display = isOnboarding ? 'none' : '';
-        if (bottomNav) bottomNav.style.display = isOnboarding ? 'none' : '';
+        if (header) header.style.display = '';
+        if (bottomNav) bottomNav.style.display = '';
 
         // Update bottom nav
         document.querySelectorAll('.nav-item').forEach(btn => {
@@ -2007,13 +2007,9 @@ const UI = {
         Store._set('myName', this._onbMe);
 
         Toast.show(`Let's play, ${this._onbMe}!`, 'success');
-        // Show header & nav again
-        const header = document.getElementById('app-header');
-        const bottomNav = document.getElementById('bottom-nav');
-        if (header) header.style.display = '';
-        if (bottomNav) bottomNav.style.display = '';
         Auth.initDefaultPlayers();
         UI.updateUserUI();
+        // Navigate to dashboard (Router will show app-container + header + nav)
         Router.navigate('dashboard');
     },
 
