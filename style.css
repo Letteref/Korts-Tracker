@@ -1777,47 +1777,21 @@ input::placeholder, textarea::placeholder {
     font-variant-numeric: tabular-nums;
 }
 
-/* Court Display */
+/* Court Display — now uses broadcast scoreboard */
 .group-court {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 24px;
-    background: linear-gradient(135deg, #0d3328, #1a4a3a);
-    border-radius: var(--radius);
-    padding: 32px 24px;
-    margin-bottom: 16px;
-    border: 2px solid var(--accent);
+    display: none;
 }
 
 .court-player {
-    text-align: center;
-    flex: 1;
-}
-
-.court-player-name {
-    font-weight: 700;
-    font-size: 1.1rem;
-    margin-top: 8px;
-}
-
-.court-player-wins {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    margin-top: 2px;
+    display: none;
 }
 
 .court-vs {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: var(--gold);
+    display: none;
 }
 
 .group-scoring-buttons {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 16px;
+    display: none;
 }
 
 /* Queue */

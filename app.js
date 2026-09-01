@@ -2507,6 +2507,12 @@ const UI = {
         document.getElementById('group-p1-wins').textContent = `${match.p1.wins || 0} wins`;
         document.getElementById('group-p2-wins').textContent = `${match.p2.wins || 0} wins`;
 
+        // Live scores
+        document.getElementById('group-p1-point').textContent = display.p1Point;
+        document.getElementById('group-p2-point').textContent = display.p2Point;
+        document.getElementById('group-p1-game').textContent = display.p1Game;
+        document.getElementById('group-p2-game').textContent = display.p2Game;
+
         // Leaderboard
         const lb = [...session.players].sort((a, b) => b.wins - a.wins);
         const lbBody = document.getElementById('leaderboard-body');

@@ -848,6 +848,7 @@
         <!-- ===== SCREEN: GROUP PLAY LIVE ===== -->
         <div id="screen-group" class="main-screen hidden">
             <div class="group-play-container">
+                <!-- Timer Header -->
                 <div class="group-header">
                     <div class="group-session-timer">
                         <i data-lucide="clock"></i>
@@ -862,28 +863,56 @@
                     </div>
                 </div>
 
-                <div class="group-court">
-                    <div class="court-player court-left" id="group-court-p1">
-                        <div class="avatar-circle avatar-lg" id="group-p1-avatar"></div>
-                        <div class="court-player-name" id="group-p1-name">Player 1</div>
-                        <div class="court-player-wins" id="group-p1-wins">0 wins</div>
-                    </div>
-                    <div class="court-vs">VS</div>
-                    <div class="court-player court-right" id="group-court-p2">
-                        <div class="avatar-circle avatar-lg" id="group-p2-avatar"></div>
-                        <div class="court-player-name" id="group-p2-name">Player 2</div>
-                        <div class="court-player-wins" id="group-p2-wins">0 wins</div>
+                <!-- Broadcast Scoreboard -->
+                <div class="broadcast-scoreboard">
+                    <div class="bc-main-row">
+                        <!-- Player 1 -->
+                        <div class="bc-player bc-player-left">
+                            <div class="avatar-circle bc-avatar" id="group-p1-avatar"></div>
+                            <div class="bc-player-info">
+                                <div class="bc-player-name" id="group-p1-name">Player 1</div>
+                                <div class="bc-player-detail" id="group-p1-wins">0 wins</div>
+                            </div>
+                        </div>
+
+                        <!-- Score Center -->
+                        <div class="bc-score-center">
+                            <div class="bc-game-scores">
+                                <span class="bc-game" id="group-p1-game">0</span>
+                                <span class="bc-game-sep">-</span>
+                                <span class="bc-game" id="group-p2-game">0</span>
+                            </div>
+                            <div class="bc-point-scores">
+                                <span class="bc-point" id="group-p1-point">0</span>
+                                <span class="bc-point-sep"></span>
+                                <span class="bc-point" id="group-p2-point">0</span>
+                            </div>
+                        </div>
+
+                        <!-- Player 2 -->
+                        <div class="bc-player bc-player-right">
+                            <div class="bc-player-info">
+                                <div class="bc-player-name" id="group-p2-name">Player 2</div>
+                                <div class="bc-player-detail" id="group-p2-wins">0 wins</div>
+                            </div>
+                            <div class="avatar-circle bc-avatar" id="group-p2-avatar"></div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="group-scoring-buttons">
-                    <button class="score-btn score-btn-p1" id="btn-group-score-p1">
-                        <span>Point for</span>
-                        <span class="score-btn-name" id="group-score-btn-p1">Player 1</span>
+                <!-- Scoring Buttons -->
+                <div class="bc-scoring">
+                    <button class="bc-score-btn bc-score-btn-p1" id="btn-group-score-p1">
+                        <div class="bc-score-btn-inner">
+                            <span class="bc-score-btn-plus">+</span>
+                            <span class="bc-score-btn-name" id="group-score-btn-p1">Player 1</span>
+                        </div>
                     </button>
-                    <button class="score-btn score-btn-p2" id="btn-group-score-p2">
-                        <span>Point for</span>
-                        <span class="score-btn-name" id="group-score-btn-p2">Player 2</span>
+                    <button class="bc-score-btn bc-score-btn-p2" id="btn-group-score-p2">
+                        <div class="bc-score-btn-inner">
+                            <span class="bc-score-btn-plus">+</span>
+                            <span class="bc-score-btn-name" id="group-score-btn-p2">Player 2</span>
+                        </div>
                     </button>
                 </div>
 
