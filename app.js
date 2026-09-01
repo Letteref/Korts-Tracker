@@ -3367,6 +3367,46 @@ const Events = {
             btn.addEventListener('click', () => Router.navigate(btn.dataset.nav));
         });
 
+        // Quick Action button
+        const qaBtn = document.getElementById('quick-action-btn');
+        const qaPopup = document.getElementById('quick-action-popup');
+        const qaOverlay = document.getElementById('quick-action-overlay');
+        if (qaBtn) {
+            qaBtn.addEventListener('click', () => {
+                const isOpen = qaPopup.classList.contains('visible');
+                if (isOpen) {
+                    qaPopup.classList.remove('visible');
+                    qaOverlay.classList.remove('visible');
+                    qaBtn.classList.remove('open');
+                } else {
+                    qaPopup.classList.add('visible');
+                    qaOverlay.classList.add('visible');
+                    qaBtn.classList.add('open');
+                }
+            });
+        }
+        if (qaOverlay) {
+            qaOverlay.addEventListener('click', () => {
+                qaPopup.classList.remove('visible');
+                qaOverlay.classList.remove('visible');
+                qaBtn.classList.remove('open');
+            });
+        }
+        document.querySelectorAll('.qap-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                qaPopup.classList.remove('visible');
+                qaOverlay.classList.remove('visible');
+                qaBtn.classList.remove('open');
+                const action = opt.dataset.action;
+                const mode = opt.dataset.mode;
+                if (action === 'match-setup' && mode) {
+                    MatchManager.reset();
+                    MatchManager.mode = mode;
+                }
+                Router.navigate(action);
+            });
+        });
+
         // Sport toggle (header)
         document.querySelectorAll('.sport-btn').forEach(btn => {
             btn.addEventListener('click', () => {

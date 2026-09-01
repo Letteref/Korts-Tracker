@@ -1,4 +1,4 @@
-const CACHE_NAME = 'korts-v2';
+const CACHE_NAME = 'korts-v3';
 const ASSETS = [
     '/',
     '/index.html',
