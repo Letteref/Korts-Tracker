@@ -287,6 +287,11 @@ const Router = {
             this.currentScreen = screen;
         }
 
+        // Save current screen for refresh (except welcome/onboarding)
+        if (screen !== 'auth' && screen !== 'setup') {
+            Store._set('lastScreen', screen);
+        }
+
         // Auth & onboarding are standalone screens (outside app-container)
         const isStandalone = (screen === 'auth' || screen === 'setup');
         const appContainer = document.getElementById('app-container');
@@ -3600,9 +3605,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialize Lucide icons
     lucide.createIcons();
 
-    // Always show welcome screen — no auth required
     Auth.initDefaultPlayers();
-    Router.showScreen('auth');
+
+    // Restore last screen or show welcome
+    const savedScreen = Store._getSingle('lastScreen');
+    const hasSetup = Store._getSingle('myName') && Store.getPlayers().length >= 2;
+
+    if (savedScreen && hasSetup && savedScreen !== 'auth' && savedScreen !== 'setup') {
+        // User has completed setup — restore their last screen
+        UI.updateUserUI();
+        Router.showScreen(savedScreen);
+    } else if (hasSetup) {
+        // Has setup but no saved screen — go to dashboard
+        UI.updateUserUI();
+        Router.showScreen('dashboard');
+    } else {
+        // First time — show welcome
+        Router.showScreen('auth');
+    }
 
     // Initialize all event handlers
     Events.init();
