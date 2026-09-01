@@ -2159,6 +2159,12 @@ const UI = {
         document.getElementById('score-btn-p1-name').textContent = state.players[0]?.name || 'P1';
         document.getElementById('score-btn-p2-name').textContent = state.players[1]?.name || 'P2';
 
+        // Ace button labels
+        const aceP1 = document.getElementById('ace-p1-label');
+        const aceP2 = document.getElementById('ace-p2-label');
+        if (aceP1) aceP1.textContent = state.players[0]?.name || 'P1';
+        if (aceP2) aceP2.textContent = state.players[1]?.name || 'P2';
+
         // Points
         document.getElementById('sb-p1-point').textContent = display.p1Point;
         document.getElementById('sb-p2-point').textContent = display.p2Point;
@@ -2167,20 +2173,18 @@ const UI = {
         document.getElementById('sb-p1-game').textContent = display.p1Game;
         document.getElementById('sb-p2-game').textContent = display.p2Game;
 
-        // Sets
+        // Sets — broadcast style
         const p1SetsHtml = setsDisplay.map((s, i) => {
-            const isCurrent = i === state.currentSet;
             const isWon = state.setsWon.p1 > i;
-            return `<div class="sb-set-val ${isWon ? 'won' : ''}">${s.p1 || (isCurrent ? '' : '')}</div>`;
+            return `<div class="bc-set ${isWon ? 'won' : ''}">${s.p1 || ''}</div>`;
         }).join('');
         const p2SetsHtml = setsDisplay.map((s, i) => {
-            const isCurrent = i === state.currentSet;
             const isWon = state.setsWon.p2 > i;
-            return `<div class="sb-set-val ${isWon ? 'won' : ''}">${s.p2 || (isCurrent ? '' : '')}</div>`;
+            return `<div class="bc-set ${isWon ? 'won' : ''}">${s.p2 || ''}</div>`;
         }).join('');
 
-        document.getElementById('sb-p1-sets').innerHTML = p1SetsHtml;
-        document.getElementById('sb-p2-sets').innerHTML = p2SetsHtml;
+        document.getElementById('bc-p1-sets').innerHTML = p1SetsHtml;
+        document.getElementById('bc-p2-sets').innerHTML = p2SetsHtml;
 
         // Server indicator
         document.getElementById('sb-p1-server').classList.toggle('active', state.serving === 'p1');

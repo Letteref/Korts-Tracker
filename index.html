@@ -560,91 +560,103 @@
                     </div>
                 </div>
 
-                <!-- Scoreboard -->
-                <div class="scoreboard" id="scoreboard">
-                    <!-- Player 1 Side -->
-                    <div class="scoreboard-player sb-left">
-                        <div class="sb-player-info">
-                            <div class="avatar-circle sb-avatar" id="sb-p1-avatar"></div>
-                            <div class="sb-name" id="sb-p1-name">Player 1</div>
-                            <div class="sb-detail" id="sb-p1-detail"></div>
-                        </div>
-                        <div class="sb-scores">
-                            <div class="sb-sets" id="sb-p1-sets"></div>
-                            <div class="sb-game" id="sb-p1-game">0</div>
-                            <div class="sb-point" id="sb-p1-point">0</div>
-                        </div>
+                <!-- ESPN Broadcast Scoreboard -->
+                <div class="broadcast-scoreboard" id="scoreboard">
+                    <!-- Set Scores Row -->
+                    <div class="bc-sets-row">
+                        <div class="bc-player-sets" id="bc-p1-sets"></div>
+                        <div class="bc-sets-label">SETS</div>
+                        <div class="bc-player-sets" id="bc-p2-sets"></div>
                     </div>
 
-                    <!-- Server Indicator -->
-                    <div class="server-indicator">
-                        <div class="server-dot sb-left-server" id="sb-p1-server"></div>
-                    </div>
-
-                    <div class="score-divider"></div>
-
-                    <div class="server-indicator">
-                        <div class="server-dot sb-right-server" id="sb-p2-server"></div>
-                    </div>
-
-                    <!-- Player 2 Side -->
-                    <div class="scoreboard-player sb-right">
-                        <div class="sb-scores">
-                            <div class="sb-sets" id="sb-p2-sets"></div>
-                            <div class="sb-game" id="sb-p2-game">0</div>
-                            <div class="sb-point" id="sb-p2-point">0</div>
+                    <!-- Main Score Row -->
+                    <div class="bc-main-row">
+                        <!-- Player 1 -->
+                        <div class="bc-player bc-player-left">
+                            <div class="bc-server-dot" id="sb-p1-server"></div>
+                            <div class="avatar-circle bc-avatar" id="sb-p1-avatar"></div>
+                            <div class="bc-player-info">
+                                <div class="bc-player-name" id="sb-p1-name">Player 1</div>
+                                <div class="bc-player-detail" id="sb-p1-detail"></div>
+                            </div>
                         </div>
-                        <div class="sb-player-info">
-                            <div class="avatar-circle sb-avatar" id="sb-p2-avatar"></div>
-                            <div class="sb-name" id="sb-p2-name">Player 2</div>
-                            <div class="sb-detail" id="sb-p2-detail"></div>
+
+                        <!-- Score Center -->
+                        <div class="bc-score-center">
+                            <div class="bc-game-scores">
+                                <span class="bc-game" id="sb-p1-game">0</span>
+                                <span class="bc-game-sep">-</span>
+                                <span class="bc-game" id="sb-p2-game">0</span>
+                            </div>
+                            <div class="bc-point-scores">
+                                <span class="bc-point" id="sb-p1-point">0</span>
+                                <span class="bc-point-sep"></span>
+                                <span class="bc-point" id="sb-p2-point">0</span>
+                            </div>
+                        </div>
+
+                        <!-- Player 2 -->
+                        <div class="bc-player bc-player-right">
+                            <div class="bc-player-info">
+                                <div class="bc-player-name" id="sb-p2-name">Player 2</div>
+                                <div class="bc-player-detail" id="sb-p2-detail"></div>
+                            </div>
+                            <div class="avatar-circle bc-avatar" id="sb-p2-avatar"></div>
+                            <div class="bc-server-dot" id="sb-p2-server"></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Scoring Buttons -->
-                <div class="scoring-buttons">
-                    <button class="score-btn score-btn-p1" id="btn-score-p1">
-                        <span class="score-btn-label" id="score-btn-p1-label">Point for</span>
-                        <span class="score-btn-name" id="score-btn-p1-name">Player 1</span>
+                <div class="bc-scoring">
+                    <button class="bc-score-btn bc-score-btn-p1" id="btn-score-p1">
+                        <div class="bc-score-btn-inner">
+                            <span class="bc-score-btn-plus">+</span>
+                            <span class="bc-score-btn-name" id="score-btn-p1-name">Player 1</span>
+                        </div>
                     </button>
-                    <button class="score-btn score-btn-p2" id="btn-score-p2">
-                        <span class="score-btn-label" id="score-btn-p2-label">Point for</span>
-                        <span class="score-btn-name" id="score-btn-p2-name">Player 2</span>
+                    <button class="bc-score-btn bc-score-btn-p2" id="btn-score-p2">
+                        <div class="bc-score-btn-inner">
+                            <span class="bc-score-btn-plus">+</span>
+                            <span class="bc-score-btn-name" id="score-btn-p2-name">Player 2</span>
+                        </div>
                     </button>
                 </div>
 
-                <!-- Stats Panel (Expandable) -->
-                <div class="stats-panel" id="match-stats-panel">
-                    <button class="stats-toggle" id="btn-toggle-stats">
-                        <i data-lucide="bar-chart-3"></i> Match Statistics
-                        <i data-lucide="chevron-down"></i>
+                <!-- Stats Panel -->
+                <div class="bc-stats" id="match-stats-panel">
+                    <button class="bc-stats-toggle" id="btn-toggle-stats">
+                        <i data-lucide="bar-chart-3"></i>
+                        <span>Statistics</span>
+                        <i data-lucide="chevron-down" class="bc-stats-chevron"></i>
                     </button>
-                    <div class="stats-content hidden" id="match-stats-content">
-                        <div class="stats-grid">
-                            <div class="stat-row">
-                                <span class="stat-val" id="stat-p1-points">0</span>
-                                <span class="stat-name">Points Won</span>
-                                <span class="stat-val" id="stat-p2-points">0</span>
+                    <div class="bc-stats-content hidden" id="match-stats-content">
+                        <div class="bc-stats-grid">
+                            <div class="bc-stat">
+                                <span class="bc-stat-p1" id="stat-p1-points">0</span>
+                                <span class="bc-stat-label">Points</span>
+                                <span class="bc-stat-p2" id="stat-p2-points">0</span>
                             </div>
-                            <div class="stat-row">
-                                <span class="stat-val" id="stat-p1-games">0</span>
-                                <span class="stat-name">Games Won</span>
-                                <span class="stat-val" id="stat-p2-games">0</span>
+                            <div class="bc-stat">
+                                <span class="bc-stat-p1" id="stat-p1-games">0</span>
+                                <span class="bc-stat-label">Games</span>
+                                <span class="bc-stat-p2" id="stat-p2-games">0</span>
                             </div>
-                            <div class="stat-row">
-                                <span class="stat-val" id="stat-p1-aces">0</span>
-                                <span class="stat-name">Aces</span>
-                                <span class="stat-val" id="stat-p2-aces">0</span>
+                            <div class="bc-stat">
+                                <span class="bc-stat-p1" id="stat-p1-aces">0</span>
+                                <span class="bc-stat-label">Aces</span>
+                                <span class="bc-stat-p2" id="stat-p2-aces">0</span>
                             </div>
-                            <div class="stat-row">
-                                <span class="stat-val" id="stat-p1-breaks">0</span>
-                                <span class="stat-name">Break Points</span>
-                                <span class="stat-val" id="stat-p2-breaks">0</span>
+                            <div class="bc-stat">
+                                <span class="bc-stat-p1" id="stat-p1-breaks">0</span>
+                                <span class="bc-stat-label">Break Pts</span>
+                                <span class="bc-stat-p2" id="stat-p2-breaks">0</span>
                             </div>
                         </div>
-                        <button class="btn btn-ghost btn-sm" id="btn-ace-p1">🎾 Ace — Player 1</button>
-                        <button class="btn btn-ghost btn-sm" id="btn-ace-p2">🎾 Ace — Player 2</button>
+                        <div class="bc-ace-btns">
+                            <button class="btn btn-ghost btn-sm" id="btn-ace-p1">🎾 Ace — <span id="ace-p1-label">P1</span></button>
+                            <button class="btn btn-ghost btn-sm" id="btn-ace-p2">🎾 Ace — <span id="ace-p2-label">P2</span></button>
+                        </div>
                     </div>
                 </div>
             </div>
