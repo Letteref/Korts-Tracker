@@ -1280,37 +1280,6 @@
             </div>
         </div>
 
-        <!-- ===== QUICK ACTION POPUP ===== -->
-        <div class="quick-action-overlay" id="quick-action-overlay"></div>
-        <div class="quick-action-popup" id="quick-action-popup">
-            <div class="qap-header">
-                <span class="qap-title">New Match</span>
-                <span class="qap-subtitle">Choose match type</span>
-            </div>
-            <div class="qap-options">
-                <button class="qap-option" data-action="match-setup" data-mode="single">
-                    <div class="qap-icon">🎾</div>
-                    <div class="qap-label">Single</div>
-                    <div class="qap-desc">1 vs 1</div>
-                </button>
-                <button class="qap-option" data-action="match-setup" data-mode="double">
-                    <div class="qap-icon">🏓</div>
-                    <div class="qap-label">Double</div>
-                    <div class="qap-desc">2 vs 2</div>
-                </button>
-                <button class="qap-option" data-action="group-setup">
-                    <div class="qap-icon">👥</div>
-                    <div class="qap-label">Group</div>
-                    <div class="qap-desc">Round robin</div>
-                </button>
-                <button class="qap-option" data-action="tournament-setup">
-                    <div class="qap-icon">🏆</div>
-                    <div class="qap-label">Tournament</div>
-                    <div class="qap-desc">Bracket play</div>
-                </button>
-            </div>
-        </div>
-
         <!-- ===== BOTTOM NAV BAR (MOBILE) ===== -->
         <nav class="bottom-nav" id="bottom-nav">
             <button class="nav-item active" data-nav="dashboard">
@@ -1331,10 +1300,41 @@
                 <span>Clubs</span>
             </button>
         </nav>
-        <button class="quick-action-btn" id="quick-action-btn">
-            <i data-lucide="plus"></i>
-        </button>
     </div>
+
+    <!-- ===== QUICK ACTION (outside app-container) ===== -->
+    <div class="quick-action-overlay" id="quick-action-overlay"></div>
+    <div class="quick-action-popup" id="quick-action-popup">
+        <div class="qap-header">
+            <span class="qap-title">New Match</span>
+            <span class="qap-subtitle">Choose match type</span>
+        </div>
+        <div class="qap-options">
+            <button class="qap-option" data-action="match-setup" data-mode="single">
+                <div class="qap-icon">🎾</div>
+                <div class="qap-label">Single</div>
+                <div class="qap-desc">1 vs 1</div>
+            </button>
+            <button class="qap-option" data-action="match-setup" data-mode="double">
+                <div class="qap-icon">🏓</div>
+                <div class="qap-label">Double</div>
+                <div class="qap-desc">2 vs 2</div>
+            </button>
+            <button class="qap-option" data-action="group-setup">
+                <div class="qap-icon">👥</div>
+                <div class="qap-label">Group</div>
+                <div class="qap-desc">Round robin</div>
+            </button>
+            <button class="qap-option" data-action="tournament-setup">
+                <div class="qap-icon">🏆</div>
+                <div class="qap-label">Tournament</div>
+                <div class="qap-desc">Bracket play</div>
+            </button>
+        </div>
+    </div>
+    <button class="quick-action-btn" id="quick-action-btn">
+        <i data-lucide="plus"></i>
+    </button>
 
     <script src="app.js"></script>
 </body>

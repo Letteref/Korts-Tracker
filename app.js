@@ -414,8 +414,15 @@ const Router = {
         // Always show header & nav when entering app
         const header = document.getElementById('app-header');
         const bottomNav = document.getElementById('bottom-nav');
+        const qaBtn = document.getElementById('quick-action-btn');
+        const qaPopup = document.getElementById('quick-action-popup');
+        const qaOverlay = document.getElementById('quick-action-overlay');
         if (header) header.style.display = '';
         if (bottomNav) bottomNav.style.display = '';
+        // Show/hide quick action elements
+        if (qaBtn) qaBtn.style.display = isStandalone ? 'none' : '';
+        if (qaPopup) { qaPopup.classList.remove('visible'); qaPopup.style.display = isStandalone ? 'none' : ''; }
+        if (qaOverlay) { qaOverlay.classList.remove('visible'); qaOverlay.style.display = isStandalone ? 'none' : ''; }
 
         // Update bottom nav
         document.querySelectorAll('.nav-item').forEach(btn => {
