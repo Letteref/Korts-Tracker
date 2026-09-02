@@ -428,9 +428,12 @@ const Router = {
         const qaPopup = document.getElementById('quick-action-popup');
         const qaOverlay = document.getElementById('quick-action-overlay');
         if (header) header.style.display = '';
-        if (bottomNav) bottomNav.style.display = '';
+        // Hide bottom nav & FAB during immersive screens
+        const immersiveScreens = ['match', 'match-setup', 'group', 'group-setup', 'tournament', 'tournament-setup', 'admin', 'profile', 'clubs', 'club-detail'];
+        const isImmersive = immersiveScreens.includes(screen);
+        if (bottomNav) bottomNav.style.display = isImmersive ? 'none' : '';
         // Show/hide quick action elements
-        if (qaBtn) qaBtn.style.display = isStandalone ? 'none' : '';
+        if (qaBtn) qaBtn.style.display = (isStandalone || isImmersive) ? 'none' : '';
         if (qaPopup) { qaPopup.classList.remove('visible'); qaPopup.style.display = isStandalone ? 'none' : ''; }
         if (qaOverlay) { qaOverlay.classList.remove('visible'); qaOverlay.style.display = isStandalone ? 'none' : ''; }
 
@@ -731,8 +734,8 @@ const Scoring = {
             p1Point = state.advantage === 'p1' ? 'AD' : (state.advantage === 'p2' ? '40' : '40');
             p2Point = state.advantage === 'p2' ? 'AD' : (state.advantage === 'p1' ? '40' : '40');
             if (!state.advantage) {
-                p1Point = 'DUECE';
-                p2Point = 'DUECE';
+                p1Point = 'DEUCE';
+                p2Point = 'DEUCE';
             }
         } else {
             p1Point = pointLabels[state.points.p1];
@@ -1098,6 +1101,9 @@ const GroupPlay = {
             userId: Auth.currentUser?.id
         };
 
+        // Save as active for resume
+        Store.setActiveGroupSession(this.current);
+
         // Start first match
         this.startNewMatch();
         this.startSessionTimer();
@@ -1151,6 +1157,9 @@ const GroupPlay = {
 
         this.matchSeconds = this.current.matchTime;
         this.startMatchTimer();
+
+        // Save state for resume
+        Store.setActiveGroupSession(this.current);
     },
 
     awardPoint(player) {
@@ -1201,6 +1210,9 @@ const GroupPlay = {
             timestamp: Date.now()
         });
 
+        // Save state for resume
+        Store.setActiveGroupSession(this.current);
+
         // Show transition and start next match
         this.showTransition(match.winner);
     },
@@ -1215,7 +1227,9 @@ const GroupPlay = {
     },
 
     startSessionTimer() {
-        this.sessionSeconds = this.current.endTime;
+        // Calculate remaining time from elapsed since start
+        const elapsed = Math.floor((Date.now() - this.current.startTime) / 1000);
+        this.sessionSeconds = Math.max(0, this.current.endTime - elapsed);
         this.sessionTimerInterval = setInterval(() => {
             this.sessionSeconds--;
             UI.updateGroupTimers();
@@ -2518,8 +2532,12 @@ const UI = {
         if (aceP2) aceP2.textContent = state.players[1]?.name || 'P2';
 
         // Points
-        document.getElementById('sb-p1-point').textContent = display.p1Point;
-        document.getElementById('sb-p2-point').textContent = display.p2Point;
+        const p1PointEl = document.getElementById('sb-p1-point');
+        const p2PointEl = document.getElementById('sb-p2-point');
+        p1PointEl.textContent = display.p1Point;
+        p2PointEl.textContent = display.p2Point;
+        p1PointEl.classList.toggle('deuce-text', display.p1Point === 'DEUCE');
+        p2PointEl.classList.toggle('deuce-text', display.p2Point === 'DEUCE');
 
         // Games
         document.getElementById('sb-p1-game').textContent = display.p1Game;
@@ -3475,6 +3493,15 @@ const Events = {
         document.getElementById('nav-history')?.addEventListener('click', () => Router.navigate('history'));
         document.getElementById('nav-clubs')?.addEventListener('click', () => Router.navigate('clubs'));
 
+        // History search
+        document.getElementById('search-history')?.addEventListener('input', Utils.debounce((e) => {
+            const q = e.target.value.toLowerCase();
+            document.querySelectorAll('#history-matches .history-item').forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(q) ? '' : 'none';
+            });
+        }));
+
         // Bottom nav
         document.querySelectorAll('.nav-item').forEach(btn => {
             btn.addEventListener('click', () => Router.navigate(btn.dataset.nav));
@@ -3516,11 +3543,6 @@ const Events = {
                 e.stopPropagation();
                 closeQAPopup();
                 const action = opt.dataset.action;
-                const mode = opt.dataset.mode;
-                if (action === 'match-setup' && mode) {
-                    MatchManager.reset();
-                    MatchManager.mode = mode;
-                }
                 Router.navigate(action);
             });
         });
@@ -3652,14 +3674,20 @@ const Events = {
         document.getElementById('btn-match-pause')?.addEventListener('click', () => MatchManager.togglePause());
         document.getElementById('btn-match-undo')?.addEventListener('click', () => MatchManager.undo());
         document.getElementById('btn-match-retire')?.addEventListener('click', () => {
-            if (confirm('Retire this match? The other player wins.')) {
-                const state = MatchManager.currentState;
-                if (state) {
-                    // The current server's opponent wins by retirement
-                    const retirePlayer = state.serving === 'p1' ? 'p1' : 'p2';
+            const state = MatchManager.currentState;
+            if (!state) return;
+            const p1Name = state.players[0]?.name || 'Player 1';
+            const p2Name = state.players[1]?.name || 'Player 2';
+            Confirm.show(
+                'Retire Match',
+                `Who is retiring? The other player wins by walkover.`,
+                () => {
+                    // Show a second prompt to pick which player retires
+                    const choice = confirm(`${p1Name} retires?\n\nPress OK for ${p1Name} to retire,\nCancel for ${p2Name} to retire.`);
+                    const retirePlayer = choice ? 'p1' : 'p2';
                     MatchManager.retire(retirePlayer);
                 }
-            }
+            );
         });
         document.getElementById('btn-ace-p1')?.addEventListener('click', () => MatchManager.ace('p1'));
         document.getElementById('btn-ace-p2')?.addEventListener('click', () => MatchManager.ace('p2'));
