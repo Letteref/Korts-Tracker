@@ -4196,6 +4196,12 @@ const Events = {
             if (qaPopup) qaPopup.classList.remove('visible');
             if (qaOverlay) qaOverlay.classList.remove('visible');
             if (qaBtn) qaBtn.classList.remove('open');
+            // Reset sub-menus on close
+            const mainHeader = document.querySelector('#quick-action-popup > .qap-header');
+            const mainOpts = document.querySelector('#quick-action-popup > .qap-options');
+            if (mainHeader) mainHeader.style.display = '';
+            if (mainOpts) mainOpts.style.display = '';
+            document.querySelectorAll('.qap-submenu').forEach(m => m.style.display = 'none');
         }
 
         function openQAPopup() {
@@ -4219,50 +4225,47 @@ const Events = {
             qaOverlay.addEventListener('click', () => closeQAPopup());
         }
         // Sport selection buttons (show sub-menus)
+        // Helper: show/hide main header when switching menus
+        function showMainMenu() {
+            const mainHeader = document.querySelector('#quick-action-popup > .qap-header');
+            const mainOpts = document.querySelector('#quick-action-popup > .qap-options');
+            document.getElementById('qap-padel-menu').style.display = 'none';
+            document.getElementById('qap-tennis-menu').style.display = 'none';
+            if (mainHeader) mainHeader.style.display = '';
+            if (mainOpts) mainOpts.style.display = '';
+        }
+        function showSubMenu(sport) {
+            const mainHeader = document.querySelector('#quick-action-popup > .qap-header');
+            const mainOpts = document.querySelector('#quick-action-popup > .qap-options');
+            const submenu = document.getElementById(`qap-${sport}-menu`);
+            if (mainHeader) mainHeader.style.display = 'none';
+            if (mainOpts) mainOpts.style.display = 'none';
+            if (submenu) submenu.style.display = 'block';
+        }
+
         document.querySelectorAll('.qap-sport-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const sport = btn.dataset.sport;
-                const mainMenu = document.querySelector('#quick-action-popup > .qap-options');
-                const submenu = document.getElementById(`qap-${sport}-menu`);
-                if (mainMenu && submenu) {
-                    mainMenu.style.display = 'none';
-                    submenu.style.display = 'block';
-                }
+                showSubMenu(btn.dataset.sport);
             });
         });
 
         // Back buttons in sub-menus
         document.getElementById('qap-padel-back')?.addEventListener('click', (e) => {
             e.stopPropagation();
-            const mainMenu = document.querySelector('#quick-action-popup > .qap-options');
-            const submenu = document.getElementById('qap-padel-menu');
-            if (mainMenu && submenu) {
-                submenu.style.display = 'none';
-                mainMenu.style.display = '';
-            }
+            showMainMenu();
         });
 
         document.getElementById('qap-tennis-back')?.addEventListener('click', (e) => {
             e.stopPropagation();
-            const mainMenu = document.querySelector('#quick-action-popup > .qap-options');
-            const submenu = document.getElementById('qap-tennis-menu');
-            if (mainMenu && submenu) {
-                submenu.style.display = 'none';
-                mainMenu.style.display = '';
-            }
+            showMainMenu();
         });
 
         // All qap-option buttons (excluding sport buttons which have their own handler)
         document.querySelectorAll('.qap-option:not(.qap-sport-btn)').forEach(opt => {
             opt.addEventListener('click', (e) => {
                 e.stopPropagation();
-                closeQAPopup();
-                // Reset sub-menus
-                const mainMenu = document.querySelector('#quick-action-popup > .qap-options');
-                document.getElementById('qap-padel-menu').style.display = 'none';
-                document.getElementById('qap-tennis-menu').style.display = 'none';
-                if (mainMenu) mainMenu.style.display = '';
+                closeQAPopup(); // also resets sub-menus
                 // Navigate
                 const action = opt.dataset.action;
                 if (action) Router.navigate(action);

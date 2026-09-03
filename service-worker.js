@@ -1,5 +1,5 @@
-const CACHE_NAME = 'korts-v6';
-const ASSETS = [
+const CACHE_NAME = 'korts-v8';
+const STATIC_ASSETS = [
     '/',
     '/index.html',
     '/style.css',
@@ -11,7 +11,7 @@ const ASSETS = [
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(ASSETS);
+            return cache.addAll(STATIC_ASSETS);
         })
     );
     self.skipWaiting();
@@ -29,12 +29,15 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Fetch — serve from cache, fallback to network
+// Fetch — network-first for code, cache-first for everything else
 self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        caches.match(event.request).then((cached) => {
-            return cached || fetch(event.request).then((response) => {
-                // Cache new requests
+    const url = new URL(event.request.url);
+    const isCodeFile = /\.(js|css)$/.test(url.pathname) || url.pathname === '/';
+
+    if (isCodeFile) {
+        // Network-first: always try network, fall back to cache
+        event.respondWith(
+            fetch(event.request).then((response) => {
                 if (response.status === 200) {
                     const clone = response.clone();
                     caches.open(CACHE_NAME).then((cache) => {
@@ -42,12 +45,22 @@ self.addEventListener('fetch', (event) => {
                     });
                 }
                 return response;
-            });
-        }).catch(() => {
-            // Offline fallback
-            if (event.request.destination === 'document') {
-                return caches.match('/index.html');
-            }
-        })
-    );
+            }).catch(() => caches.match(event.request))
+        );
+    } else {
+        // Cache-first for images, fonts, etc.
+        event.respondWith(
+            caches.match(event.request).then((cached) => {
+                return cached || fetch(event.request).then((response) => {
+                    if (response.status === 200) {
+                        const clone = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(event.request, clone);
+                        });
+                    }
+                    return response;
+                });
+            })
+        );
+    }
 });
