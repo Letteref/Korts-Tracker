@@ -118,6 +118,15 @@ const Store = {
     getGroupSessions() { return this._get('groupSessions', []); },
     saveGroupSessions(sessions) { this._set('groupSessions', sessions); },
 
+    // Padel Sessions
+    getPadelSessions() { return this._get('padelSessions', []); },
+    savePadelSessions(sessions) { this._set('padelSessions', sessions); },
+
+    // Active Padel session (for resume)
+    getActivePadelSession() { return this._getSingle('activePadelSession'); },
+    setActivePadelSession(s) { this._set('activePadelSession', s); },
+    clearActivePadelSession() { localStorage.removeItem('st_activePadelSession'); },
+
     // Active tournament (for resume)
     getActiveTournament() { return this._getSingle('activeTournament'); },
     setActiveTournament(t) { this._set('activeTournament', t); },
@@ -429,7 +438,7 @@ const Router = {
         const qaOverlay = document.getElementById('quick-action-overlay');
         if (header) header.style.display = '';
         // Hide bottom nav & FAB during immersive screens
-        const immersiveScreens = ['match', 'match-setup', 'group', 'group-setup', 'tournament', 'tournament-setup', 'admin', 'profile', 'clubs', 'club-detail'];
+        const immersiveScreens = ['match', 'match-setup', 'group', 'group-setup', 'tournament', 'tournament-setup', 'padel-setup', 'padel-live', 'admin', 'profile', 'clubs', 'club-detail'];
         const isImmersive = immersiveScreens.includes(screen);
         if (bottomNav) bottomNav.style.display = isImmersive ? 'none' : '';
         // Show/hide quick action elements
@@ -458,6 +467,8 @@ const Router = {
             case 'match': UI.renderMatch(); break;
             case 'tournament-setup': UI.renderTournamentSetup(); break;
             case 'tournament': UI.renderTournamentBracket(); break;
+            case 'padel-setup': UI.renderPadelSetup(); break;
+            case 'padel-live': UI.renderPadelLive(); break;
             case 'group-setup': UI.renderGroupSetup(); break;
             case 'group': UI.renderGroupPlay(); break;
             case 'clubs': UI.renderClubs(); break;
@@ -1288,6 +1299,414 @@ const GroupPlay = {
         clearInterval(this.sessionTimerInterval);
         this.stopMatchTimer();
         this.current = null;
+    }
+};
+
+// ============================================================
+// PADEL ENGINE (Americano, Mexicano, KOTH, Team, Knockout, Group Stage)
+// ============================================================
+const PadelEngine = {
+    current: null,
+    sessionTimerInterval: null,
+    sessionSeconds: 0,
+
+    // ---- AMERICANO ----
+    // Round-robin: all players paired, rotate partners each round
+    generateAmericanoRounds(players, numRounds, courts) {
+        const rounds = [];
+        const n = players.length;
+        
+        // Ensure even number of players
+        const playerList = n % 2 === 0 ? [...players] : [...players, null]; // null = bye
+        
+        for (let round = 0; round < numRounds; round++) {
+            const matchups = [];
+            const rotated = [...playerList];
+            // Rotate all except first player
+            if (round > 0) {
+                const first = rotated.shift();
+                for (let i = 0; i < round; i++) {
+                    rotated.push(rotated.shift());
+                }
+                rotated.unshift(first);
+            }
+            
+            // Pair up: 0vslast, 1vssecond-last, etc.
+            for (let i = 0; i < Math.floor(rotated.length / 2); i++) {
+                const p1 = rotated[i];
+                const p2 = rotated[rotated.length - 1 - i];
+                if (p1 && p2) {
+                    matchups.push({
+                        id: Utils.generateId(),
+                        team1: [p1],
+                        team2: [p2],
+                        court: (i % courts) + 1,
+                        score: null,
+                        completed: false
+                    });
+                }
+            }
+            rounds.push({ round: round + 1, matchups });
+        }
+        return rounds;
+    },
+
+    // ---- MEXICANO ----
+    // Same as Americano but with +M bonus points
+    generateMexicanoRounds(players, numRounds, courts) {
+        const rounds = this.generateAmericanoRounds(players, numRounds, courts);
+        // Mark as Mexicano for scoring
+        rounds.forEach(r => r.format = 'mexicano');
+        return rounds;
+    },
+
+    // ---- KING OF THE HILL (KOTH) ----
+    generateKOTHMatchups(players, courts) {
+        const matchups = [];
+        // First court: seed 1 vs seed 2
+        // Other courts: remaining players paired
+        const shuffled = [...players].sort(() => Math.random() - 0.5);
+        for (let i = 0; i < Math.min(courts, Math.floor(shuffled.length / 2)); i++) {
+            matchups.push({
+                id: Utils.generateId(),
+                team1: [shuffled[i * 2]],
+                team2: [shuffled[i * 2 + 1]],
+                court: i + 1,
+                score: null,
+                completed: false
+            });
+        }
+        return matchups;
+    },
+
+    // ---- TEAM AMERICANO ----
+    generateTeamAmericano(teams, numRounds, courts) {
+        const rounds = [];
+        for (let round = 0; round < numRounds; round++) {
+            const matchups = [];
+            // Rotate team pairings
+            const teamOrder = [...teams];
+            for (let i = 0; i < round; i++) {
+                teamOrder.push(teamOrder.shift());
+            }
+            for (let i = 0; i < Math.floor(teamOrder.length / 2); i++) {
+                matchups.push({
+                    id: Utils.generateId(),
+                    team1: teamOrder[i],
+                    team2: teamOrder[teamOrder.length - 1 - i],
+                    court: (i % courts) + 1,
+                    score: null,
+                    completed: false,
+                    isTeamMatch: true
+                });
+            }
+            rounds.push({ round: round + 1, matchups });
+        }
+        return rounds;
+    },
+
+    // ---- KNOCKOUT ----
+    generateKnockoutBracket(players) {
+        let size = 2;
+        while (size < players.length) size *= 2;
+        const byes = size - players.length;
+        
+        const shuffled = [...players].sort(() => Math.random() - 0.5);
+        const padded = [...shuffled];
+        while (padded.length < size) padded.push(null);
+        
+        const matches = [];
+        const rounds = Math.log2(size);
+        
+        // First round
+        for (let i = 0; i < size / 2; i++) {
+            const p1 = padded[i * 2];
+            const p2 = padded[i * 2 + 1];
+            if (!p1 || !p2) {
+                matches.push({
+                    id: Utils.generateId(), round: 0, position: i,
+                    team1: p1 || p2, team2: null,
+                    winner: p1 || p2, completed: true, isBye: true
+                });
+            } else {
+                matches.push({
+                    id: Utils.generateId(), round: 0, position: i,
+                    team1: p1, team2: p2,
+                    winner: null, completed: false, isBye: false
+                });
+            }
+        }
+        
+        // Subsequent rounds
+        for (let round = 1; round < rounds; round++) {
+            const count = size / Math.pow(2, round + 1);
+            for (let i = 0; i < count; i++) {
+                matches.push({
+                    id: Utils.generateId(), round, position: i,
+                    team1: null, team2: null,
+                    winner: null, completed: false, isBye: false
+                });
+            }
+        }
+        
+        // Auto-advance byes
+        matches.filter(m => m.round === 0 && m.isBye).forEach(m => {
+            const nextIdx = matches.findIndex(nm =>
+                nm.round === 1 && nm.position === Math.floor(m.position / 2)
+            );
+            if (nextIdx >= 0) {
+                const next = matches[nextIdx];
+                if (!next.team1) next.team1 = m.winner;
+                else next.team2 = m.winner;
+            }
+        });
+        
+        return { matches, rounds, champion: null };
+    },
+
+    advanceKnockoutWinner(matches, completedMatch) {
+        const nextRound = completedMatch.round + 1;
+        const maxRound = Math.max(...matches.map(m => m.round));
+        if (nextRound > maxRound) {
+            // Champion!
+            return completedMatch.winner;
+        }
+        const nextIdx = matches.findIndex(m =>
+            m.round === nextRound && m.position === Math.floor(completedMatch.position / 2)
+        );
+        if (nextIdx >= 0) {
+            const next = matches[nextIdx];
+            if (!next.team1) next.team1 = completedMatch.winner;
+            else next.team2 = completedMatch.winner;
+        }
+        return null;
+    },
+
+    // ---- GROUP STAGE ----
+    generateGroupStage(players, numGroups, qualifyPerGroup) {
+        const shuffled = [...players].sort(() => Math.random() - 0.5);
+        const groups = [];
+        
+        // Distribute players into groups
+        for (let i = 0; i < numGroups; i++) {
+            groups.push({
+                id: Utils.generateId(),
+                name: `Group ${String.fromCharCode(65 + i)}`,
+                players: []
+            });
+        }
+        shuffled.forEach((p, i) => {
+            groups[i % numGroups].players.push(p);
+        });
+        
+        // Generate round-robin within each group
+        groups.forEach(group => {
+            group.rounds = this.generateAmericanoRounds(group.players, 0, 2);
+            // Auto-calculate rounds needed
+            const n = group.players.length;
+            const numRounds = n % 2 === 0 ? n - 1 : n;
+            group.rounds = this.generateAmericanoRounds(group.players, numRounds, 2);
+            group.standings = [];
+        });
+        
+        return { groups, qualifyPerGroup, knockout: null };
+    },
+
+    // ---- SMART PAIRING ----
+    // Balance matches based on skill level and recent matchups
+    smartPair(players, excludePairs = []) {
+        const shuffled = [...players].sort(() => Math.random() - 0.5);
+        const pairs = [];
+        const used = new Set();
+        
+        for (let i = 0; i < shuffled.length; i++) {
+            if (used.has(i)) continue;
+            for (let j = i + 1; j < shuffled.length; j++) {
+                if (used.has(j)) continue;
+                const pairKey = [shuffled[i].id, shuffled[j].id].sort().join('-');
+                if (!excludePairs.includes(pairKey)) {
+                    pairs.push([shuffled[i], shuffled[j]]);
+                    used.add(i);
+                    used.add(j);
+                    break;
+                }
+            }
+        }
+        return pairs;
+    },
+
+    // ---- CALCULATE STANDINGS ----
+    calculateStandings(players, results, format) {
+        const standings = players.map(p => ({
+            id: p.id,
+            name: p.name,
+            wins: 0,
+            losses: 0,
+            points: 0,
+            pointsWon: 0,
+            pointsLost: 0,
+            streak: 0,
+            maxStreak: 0
+        }));
+        
+        results.forEach(r => {
+            if (!r.completed) return;
+            const s1 = standings.find(s => s.id === r.winnerId);
+            const s2 = standings.find(s => s.id === r.loserId);
+            if (s1) {
+                s1.wins++;
+                s1.points += r.winnerPoints || 1;
+                s1.pointsWon += r.score?.team1 || 0;
+                s1.pointsLost += r.score?.team2 || 0;
+                s1.streak++;
+                s1.maxStreak = Math.max(s1.maxStreak, s1.streak);
+            }
+            if (s2) {
+                s2.losses++;
+                s2.pointsWon += r.score?.team2 || 0;
+                s2.pointsLost += r.score?.team1 || 0;
+                s2.streak = 0;
+            }
+        });
+        
+        // Sort: points desc, then point diff desc, then wins desc
+        standings.sort((a, b) =>
+            b.points - a.points ||
+            (b.pointsWon - b.pointsLost) - (a.pointsWon - a.pointsLost) ||
+            b.wins - a.wins
+        );
+        
+        return standings;
+    },
+
+    // ---- SESSION MANAGEMENT ----
+    startSession(config) {
+        this.current = {
+            id: Utils.generateId(),
+            format: config.format,
+            players: config.players,
+            courts: config.courts || 2,
+            rounds: config.rounds || [],
+            currentRound: 0,
+            results: [],
+            standings: [],
+            startTime: Date.now(),
+            userId: Auth.currentUser?.id
+        };
+        
+        Store.setActivePadelSession(this.current);
+        this.startSessionTimer();
+        Router.navigate('padel-live');
+    },
+
+    startSessionTimer() {
+        const elapsed = Math.floor((Date.now() - this.current.startTime) / 1000);
+        this.sessionSeconds = elapsed;
+        this.sessionTimerInterval = setInterval(() => {
+            this.sessionSeconds++;
+            this.updateTimerDisplay();
+        }, 1000);
+    },
+
+    updateTimerDisplay() {
+        const el = document.getElementById('padel-session-timer');
+        if (el) el.textContent = Utils.formatTime(this.sessionSeconds);
+    },
+
+    submitScore(matchupId, team1Score, team2Score) {
+        if (!this.current) return;
+        
+        const matchup = this.findMatchup(matchupId);
+        if (!matchup) return;
+        
+        matchup.score = { team1: team1Score, team2: team2Score };
+        matchup.completed = true;
+        
+        const winner = team1Score > team2Score ? matchup.team1 : matchup.team2;
+        const loser = team1Score > team2Score ? matchup.team2 : matchup.team1;
+        const winnerPoints = this.calculatePoints(team1Score, team2Score, this.current.format);
+        
+        this.current.results.push({
+            matchupId,
+            winnerId: winner.id || winner[0]?.id,
+            loserId: loser.id || loser[0]?.id,
+            score: matchup.score,
+            winnerPoints,
+            round: this.current.currentRound,
+            completed: true
+        });
+        
+        // Update standings
+        this.current.standings = this.calculateStandings(
+            this.current.players, this.current.results, this.current.format
+        );
+        
+        Store.setActivePadelSession(this.current);
+        SFX.select();
+    },
+
+    calculatePoints(team1Score, team2Score, format) {
+        let points = 1;
+        if (format === 'mexicano') {
+            // Mexicano: +1 for winning, +1 for every 2 games margin
+            const margin = Math.abs(team1Score - team2Score);
+            points = 1 + Math.floor(margin / 2);
+        } else if (format === 'bonus') {
+            // Bonus: +1 for winning, +1 for margin >= 3
+            const margin = Math.abs(team1Score - team2Score);
+            points = margin >= 3 ? 2 : 1;
+        }
+        return points;
+    },
+
+    findMatchup(id) {
+        if (!this.current) return null;
+        for (const round of this.current.rounds) {
+            const m = round.matchups.find(m => m.id === id);
+            if (m) return m;
+        }
+        return null;
+    },
+
+    nextRound() {
+        if (!this.current) return;
+        this.current.currentRound++;
+        if (this.current.currentRound >= this.current.rounds.length) {
+            this.endSession();
+        } else {
+            Store.setActivePadelSession(this.current);
+        }
+    },
+
+    endSession() {
+        clearInterval(this.sessionTimerInterval);
+        
+        const session = {
+            id: this.current.id,
+            format: this.current.format,
+            players: this.current.players,
+            results: this.current.results,
+            standings: this.current.standings,
+            totalMatches: this.current.results.length,
+            duration: this.sessionSeconds,
+            timestamp: new Date().toISOString(),
+            userId: Auth.currentUser?.id
+        };
+        
+        // Save to history
+        const sessions = Store.getPadelSessions();
+        sessions.unshift(session);
+        Store.savePadelSessions(sessions);
+        Store.clearActivePadelSession();
+        
+        UI.showPadelSummary(session);
+        this.current = null;
+    },
+
+    cleanup() {
+        clearInterval(this.sessionTimerInterval);
+        this.current = null;
+        this.sessionSeconds = 0;
     }
 };
 
@@ -2810,6 +3229,240 @@ const UI = {
         lucide.createIcons();
     },
 
+    // ===== PADEL =====
+    renderPadelSetup() {
+        const players = Store.getPlayers();
+        const grid = document.getElementById('padel-player-grid');
+        grid.innerHTML = players.map(p => `
+            <div class="tourney-player-chip" data-player-id="${p.id}" onclick="this.classList.toggle('selected');UI.updatePadelPlayerCount()">
+                <div class="avatar-circle" style="background:${Utils.getAvatarColor(p.name)}">${Utils.getInitials(p.name)}</div>
+                <span>${Utils.escapeHtml(p.name)}</span>
+            </div>
+        `).join('');
+        this.updatePadelPlayerCount();
+        this.updatePadelFormatSettings();
+        lucide.createIcons();
+    },
+
+    updatePadelPlayerCount() {
+        const selected = document.querySelectorAll('#padel-player-grid .selected').length;
+        document.getElementById('padel-player-count').textContent =
+            `${selected} player${selected !== 1 ? 's' : ''} selected`;
+    },
+
+    updatePadelFormatSettings() {
+        const format = document.querySelector('[data-padel-format].active')?.dataset.padelFormat || 'americano';
+        const roundsGroup = document.getElementById('padel-rounds-group');
+        const pointsGroup = document.getElementById('padel-points-group');
+        
+        // Show/hide settings based on format
+        const showRounds = ['americano', 'mexicano', 'team-americano'].includes(format);
+        const showPoints = ['americano', 'mexicano'].includes(format);
+        
+        if (roundsGroup) roundsGroup.style.display = showRounds ? '' : 'none';
+        if (pointsGroup) pointsGroup.style.display = showPoints ? '' : 'none';
+    },
+
+    startPadelSession() {
+        const chips = document.querySelectorAll('#padel-player-grid .selected');
+        if (chips.length < 4) {
+            Toast.show('Select at least 4 players', 'error');
+            return;
+        }
+        
+        const playerIds = [...chips].map(c => c.dataset.playerId);
+        const allPlayers = Store.getPlayers();
+        const selectedPlayers = playerIds.map(id => allPlayers.find(p => p.id === id)).filter(Boolean);
+        
+        const format = document.querySelector('[data-padel-format].active')?.dataset.padelFormat || 'americano';
+        const courts = parseInt(document.querySelector('[data-courts].active')?.dataset.courts || '2');
+        const numRounds = parseInt(document.querySelector('[data-rounds].active')?.dataset.rounds || '5');
+        
+        let config = {
+            format,
+            players: selectedPlayers,
+            courts,
+            rounds: []
+        };
+        
+        switch (format) {
+            case 'americano':
+                config.rounds = PadelEngine.generateAmericanoRounds(selectedPlayers, numRounds, courts);
+                break;
+            case 'mexicano':
+                config.rounds = PadelEngine.generateMexicanoRounds(selectedPlayers, numRounds, courts);
+                break;
+            case 'koth':
+                // KOTH generates matchups dynamically
+                config.rounds = [{ round: 1, matchups: PadelEngine.generateKOTHMatchups(selectedPlayers, courts) }];
+                break;
+            case 'team-americano':
+                // For now, treat each player as a team of 1
+                config.rounds = PadelEngine.generateTeamAmericano(selectedPlayers.map(p => [p]), numRounds, courts);
+                break;
+            case 'knockout':
+                const bracket = PadelEngine.generateKnockoutBracket(selectedPlayers);
+                config.bracket = bracket;
+                break;
+            case 'group-stage':
+                const numGroups = Math.ceil(selectedPlayers.length / 4);
+                config.groupStage = PadelEngine.generateGroupStage(selectedPlayers, numGroups, 2);
+                break;
+            case 'custom':
+                // Custom: just start with empty matchups
+                config.rounds = [{ round: 1, matchups: [] }];
+                break;
+        }
+        
+        PadelEngine.startSession(config);
+    },
+
+    renderPadelLive() {
+        const session = PadelEngine.current;
+        if (!session) return;
+        
+        // Format badge
+        const badge = document.getElementById('padel-format-badge');
+        if (badge) {
+            const formatNames = {
+                'americano': 'Americano',
+                'mexicano': 'Mexicano',
+                'koth': 'King of the Hill',
+                'team-americano': 'Team Americano',
+                'knockout': 'Knockout',
+                'group-stage': 'Group Stage',
+                'custom': 'Custom'
+            };
+            badge.textContent = formatNames[session.format] || session.format;
+        }
+        
+        // Round info
+        const roundInfo = document.getElementById('padel-round-info');
+        if (roundInfo && session.rounds) {
+            roundInfo.textContent = `Round ${session.currentRound + 1}/${session.rounds.length}`;
+        }
+        
+        // Current matchups
+        const matchupsDiv = document.getElementById('padel-matchups');
+        if (matchupsDiv && session.rounds && session.rounds[session.currentRound]) {
+            const currentRound = session.rounds[session.currentRound];
+            matchupsDiv.innerHTML = currentRound.matchups.map(m => {
+                // team1/team2 can be an array [player] or a single player object
+                const getName = (t) => Array.isArray(t) ? t.map(p => p.name).join(' & ') : (t?.name || 'TBD');
+                const team1Name = getName(m.team1);
+                const team2Name = getName(m.team2);
+                const scoreStr = m.completed ? `${m.score.team1} - ${m.score.team2}` : '';
+                
+                return `<div class="padel-matchup-card ${m.completed ? 'completed' : ''}" 
+                            onclick="UI.openPadelScoreModal('${m.id}')">
+                    <div class="padel-matchup-court">C${m.court}</div>
+                    <div class="padel-matchup-teams">
+                        <div class="padel-matchup-team">
+                            <div class="padel-matchup-team-name">${Utils.escapeHtml(team1Name)}</div>
+                        </div>
+                        <div class="padel-matchup-vs">VS</div>
+                        <div class="padel-matchup-team">
+                            <div class="padel-matchup-team-name">${Utils.escapeHtml(team2Name)}</div>
+                        </div>
+                    </div>
+                    ${m.completed ? `<div class="padel-matchup-score completed">${scoreStr}</div>` : '<div class="padel-matchup-score"><i data-lucide="edit-3"></i></div>'}
+                </div>`;
+            }).join('');
+        }
+        
+        // Leaderboard
+        const lbBody = document.getElementById('padel-leaderboard-body');
+        if (lbBody && session.standings) {
+            lbBody.innerHTML = session.standings.map((p, i) => {
+                const diff = p.pointsWon - p.pointsLost;
+                return `<tr>
+                    <td>${i + 1}</td>
+                    <td><div style="display:flex;align-items:center;gap:6px">
+                        <div class="avatar-circle" style="width:24px;height:24px;font-size:0.6rem;background:${Utils.getAvatarColor(p.name)}">${Utils.getInitials(p.name)}</div>
+                        ${Utils.escapeHtml(p.name)}
+                    </div></td>
+                    <td>${p.wins}</td>
+                    <td>${p.losses}</td>
+                    <td>${p.points}</td>
+                    <td style="color:${diff >= 0 ? 'var(--accent)' : 'var(--red)'}">${diff >= 0 ? '+' : ''}${diff}</td>
+                </tr>`;
+            }).join('');
+        }
+        
+        lucide.createIcons();
+    },
+
+    openPadelScoreModal(matchupId) {
+        const session = PadelEngine.current;
+        if (!session) return;
+        
+        const matchup = PadelEngine.findMatchup(matchupId);
+        if (!matchup) return;
+        
+        const getName2 = (t) => Array.isArray(t) ? t.map(p => p.name).join(' & ') : (t?.name || 'Team');
+        const team1Name = getName2(matchup.team1);
+        const team2Name = getName2(matchup.team2);
+        
+        document.getElementById('padel-score-team1-name').textContent = team1Name;
+        document.getElementById('padel-score-team2-name').textContent = team2Name;
+        document.getElementById('padel-score-team1-input').value = matchup.score?.team1 || 0;
+        document.getElementById('padel-score-team2-input').value = matchup.score?.team2 || 0;
+        
+        // Store matchup ID for submission
+        document.getElementById('modal-padel-score')._matchupId = matchupId;
+        document.getElementById('modal-padel-score').classList.remove('hidden');
+        lucide.createIcons();
+    },
+
+    submitPadelScore() {
+        const modal = document.getElementById('modal-padel-score');
+        const matchupId = modal._matchupId;
+        if (!matchupId) return;
+        
+        const team1Score = parseInt(document.getElementById('padel-score-team1-input').value) || 0;
+        const team2Score = parseInt(document.getElementById('padel-score-team2-input').value) || 0;
+        
+        PadelEngine.submitScore(matchupId, team1Score, team2Score);
+        modal.classList.add('hidden');
+        this.renderPadelLive();
+    },
+
+    showPadelSummary(session) {
+        const overlay = document.getElementById('padel-summary-overlay');
+        overlay.classList.remove('hidden');
+        
+        // Winner
+        const winnerDiv = document.getElementById('padel-summary-winner');
+        if (session.standings && session.standings.length > 0) {
+            winnerDiv.textContent = `🏆 ${session.standings[0].name} wins!`;
+        }
+        
+        // Leaderboard
+        const lbDiv = document.getElementById('padel-summary-leaderboard');
+        if (session.standings) {
+            lbDiv.innerHTML = session.standings.slice(0, 5).map((p, i) => {
+                const medals = ['🥇', '🥈', '🥉', '4.', '5.'];
+                return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;${i === 0 ? 'font-weight:700;color:var(--gold)' : ''}">
+                    <span style="width:24px">${medals[i] || (i + 1) + '.'}</span>
+                    <span style="flex:1">${Utils.escapeHtml(p.name)}</span>
+                    <span>${p.points} pts (${p.wins}W-${p.losses}L)</span>
+                </div>`;
+            }).join('');
+        }
+        
+        // Stats
+        const statsDiv = document.getElementById('padel-summary-stats');
+        statsDiv.innerHTML = `
+            <div>Format: ${session.format}</div>
+            <div>Matches: ${session.totalMatches}</div>
+            <div>Duration: ${Utils.formatTime(session.duration)}</div>
+        `;
+        
+        overlay._sessionData = session;
+        Confetti.create('padel-summary-overlay');
+        lucide.createIcons();
+    },
+
     // ===== GROUP PLAY =====
     renderGroupSetup() {
         const players = Store.getPlayers();
@@ -3165,10 +3818,12 @@ const UI = {
         const matches = Store.getMatches();
         const tournaments = Store.getTournaments();
         const groupSessions = Store.getGroupSessions();
+        const padelSessions = Store.getPadelSessions();
 
         this._renderHistoryMatches(matches);
         this._renderHistoryTournaments(tournaments);
         this._renderHistoryGroupSessions(groupSessions);
+        this._renderHistoryPadelSessions(padelSessions);
     },
 
     _renderHistoryMatches(matches) {
@@ -3215,6 +3870,31 @@ const UI = {
                 <div class="history-item-date">${Utils.formatDate(t.createdAt)}</div>
             </div>
         `).join('');
+    },
+
+    _renderHistoryPadelSessions(sessions) {
+        const container = document.getElementById('history-padel-sessions');
+        if (!container) return;
+        if (!sessions.length) {
+            container.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:40px">No padel sessions yet</p>';
+            return;
+        }
+
+        container.innerHTML = sessions.map(s => {
+            const formatNames = {
+                'americano': 'Americano', 'mexicano': 'Mexicano', 'koth': 'KOTH',
+                'team-americano': 'Team Americano', 'knockout': 'Knockout',
+                'group-stage': 'Group Stage', 'custom': 'Custom'
+            };
+            return `<div class="history-item">
+                <span style="color:var(--accent);display:flex;align-items:center">${Utils.icon('disc', 24)}</span>
+                <div class="history-item-info">
+                    <div class="history-item-title">${formatNames[s.format] || s.format} • ${Utils.formatTime(s.duration)}</div>
+                    <div class="history-item-detail">${s.totalMatches} matches • Winner: ${s.standings?.[0] ? Utils.escapeHtml(s.standings[0].name) : 'N/A'}</div>
+                </div>
+                <div class="history-item-date">${Utils.formatDate(s.timestamp)}</div>
+            </div>`;
+        }).join('');
     },
 
     _renderHistoryGroupSessions(sessions) {
@@ -3538,12 +4218,54 @@ const Events = {
         if (qaOverlay) {
             qaOverlay.addEventListener('click', () => closeQAPopup());
         }
-        document.querySelectorAll('.qap-option').forEach(opt => {
+        // Sport selection buttons (show sub-menus)
+        document.querySelectorAll('.qap-sport-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const sport = btn.dataset.sport;
+                const mainMenu = document.querySelector('#quick-action-popup > .qap-options');
+                const submenu = document.getElementById(`qap-${sport}-menu`);
+                if (mainMenu && submenu) {
+                    mainMenu.style.display = 'none';
+                    submenu.style.display = 'block';
+                }
+            });
+        });
+
+        // Back buttons in sub-menus
+        document.getElementById('qap-padel-back')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const mainMenu = document.querySelector('#quick-action-popup > .qap-options');
+            const submenu = document.getElementById('qap-padel-menu');
+            if (mainMenu && submenu) {
+                submenu.style.display = 'none';
+                mainMenu.style.display = '';
+            }
+        });
+
+        document.getElementById('qap-tennis-back')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const mainMenu = document.querySelector('#quick-action-popup > .qap-options');
+            const submenu = document.getElementById('qap-tennis-menu');
+            if (mainMenu && submenu) {
+                submenu.style.display = 'none';
+                mainMenu.style.display = '';
+            }
+        });
+
+        // All qap-option buttons (excluding sport buttons which have their own handler)
+        document.querySelectorAll('.qap-option:not(.qap-sport-btn)').forEach(opt => {
             opt.addEventListener('click', (e) => {
                 e.stopPropagation();
                 closeQAPopup();
+                // Reset sub-menus
+                const mainMenu = document.querySelector('#quick-action-popup > .qap-options');
+                document.getElementById('qap-padel-menu').style.display = 'none';
+                document.getElementById('qap-tennis-menu').style.display = 'none';
+                if (mainMenu) mainMenu.style.display = '';
+                // Navigate
                 const action = opt.dataset.action;
-                Router.navigate(action);
+                if (action) Router.navigate(action);
             });
         });
 
@@ -3610,6 +4332,7 @@ const Events = {
             }
             if (btn.dataset.historyTab) {
                 document.getElementById('history-matches').classList.toggle('hidden', btn.dataset.historyTab !== 'matches');
+                document.getElementById('history-padel-sessions').classList.toggle('hidden', btn.dataset.historyTab !== 'padel-sessions');
                 document.getElementById('history-tournaments').classList.toggle('hidden', btn.dataset.historyTab !== 'tournaments');
                 document.getElementById('history-group-sessions').classList.toggle('hidden', btn.dataset.historyTab !== 'group-sessions');
             }
@@ -3776,6 +4499,38 @@ const Events = {
         // Update when players are selected/deselected
         document.getElementById('group-player-grid')?.addEventListener('click', () => {
             setTimeout(updateGroupTimeDisplay, 50);
+        });
+
+        // Padel
+        document.getElementById('btn-start-padel')?.addEventListener('click', () => UI.startPadelSession());
+        document.getElementById('btn-padel-submit-score')?.addEventListener('click', () => UI.submitPadelScore());
+        document.getElementById('btn-padel-next-round')?.addEventListener('click', () => {
+            PadelEngine.nextRound();
+            UI.renderPadelLive();
+        });
+        document.getElementById('btn-padel-end-session')?.addEventListener('click', () => {
+            Confirm.show('End Session?', 'End the current padel session?', () => PadelEngine.endSession());
+        });
+        document.getElementById('close-modal-padel-score')?.addEventListener('click', () => {
+            document.getElementById('modal-padel-score').classList.add('hidden');
+        });
+        document.getElementById('btn-padel-summary-close')?.addEventListener('click', () => {
+            document.getElementById('padel-summary-overlay').classList.add('hidden');
+            PadelEngine.cleanup();
+            Router.navigate('dashboard');
+        });
+        document.getElementById('btn-share-padel')?.addEventListener('click', () => {
+            document.getElementById('padel-summary-overlay').classList.add('hidden');
+            UI.shareFromComplete('padel');
+        });
+
+        // Padel format selector
+        document.querySelectorAll('[data-padel-format]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-padel-format]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                UI.updatePadelFormatSettings();
+            });
         });
 
         // Group play

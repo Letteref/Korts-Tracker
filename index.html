@@ -833,6 +833,211 @@
             </div>
         </div>
 
+        <!-- ===== SCREEN: PADEL SETUP (Unified) ===== -->
+        <div id="screen-padel-setup" class="main-screen hidden">
+            <div class="setup-container">
+                <div class="screen-header">
+                    <h2><i data-lucide="disc"></i> Padel Setup</h2>
+                </div>
+                <div class="setup-form">
+                    <!-- Format Selector -->
+                    <div class="form-group">
+                        <label>Format</label>
+                        <div class="padel-format-grid" id="padel-format-grid">
+                            <button class="padel-format-card active" data-padel-format="americano">
+                                <div class="padel-format-icon"><i data-lucide="users"></i></div>
+                                <div class="padel-format-name">Americano</div>
+                                <div class="padel-format-desc">Round-robin rotation</div>
+                            </button>
+                            <button class="padel-format-card" data-padel-format="mexicano">
+                                <div class="padel-format-icon"><i data-lucide="shuffle"></i></div>
+                                <div class="padel-format-name">Mexicano</div>
+                                <div class="padel-format-desc">Americano + bonus</div>
+                            </button>
+                            <button class="padel-format-card" data-padel-format="koth">
+                                <div class="padel-format-icon"><i data-lucide="crown"></i></div>
+                                <div class="padel-format-name">KOTH</div>
+                                <div class="padel-format-desc">King of the Hill</div>
+                            </button>
+                            <button class="padel-format-card" data-padel-format="team-americano">
+                                <div class="padel-format-icon"><i data-lucide="shield"></i></div>
+                                <div class="padel-format-name">Team Americano</div>
+                                <div class="padel-format-desc">Team rotation</div>
+                            </button>
+                            <button class="padel-format-card" data-padel-format="knockout">
+                                <div class="padel-format-icon"><i data-lucide="trophy"></i></div>
+                                <div class="padel-format-name">Knockout</div>
+                                <div class="padel-format-desc">Single elimination</div>
+                            </button>
+                            <button class="padel-format-card" data-padel-format="group-stage">
+                                <div class="padel-format-icon"><i data-lucide="layout-grid"></i></div>
+                                <div class="padel-format-name">Group Stage</div>
+                                <div class="padel-format-desc">Groups → Knockout</div>
+                            </button>
+                            <button class="padel-format-card" data-padel-format="custom">
+                                <div class="padel-format-icon"><i data-lucide="settings"></i></div>
+                                <div class="padel-format-name">Custom</div>
+                                <div class="padel-format-desc">Build your own</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Format-specific settings (dynamic) -->
+                    <div id="padel-format-settings"></div>
+
+                    <!-- Player Selection -->
+                    <div class="form-group">
+                        <label>Select Players (min 4)</label>
+                        <div class="tourney-player-grid" id="padel-player-grid"></div>
+                        <p class="form-help" id="padel-player-count">0 players selected</p>
+                    </div>
+
+                    <!-- Court Count -->
+                    <div class="form-group" id="padel-courts-group">
+                        <label>Number of Courts</label>
+                        <div class="sport-selector">
+                            <button class="sport-select-btn" data-courts="1">1 Court</button>
+                            <button class="sport-select-btn active" data-courts="2">2 Courts</button>
+                            <button class="sport-select-btn" data-courts="3">3 Courts</button>
+                            <button class="sport-select-btn" data-courts="4">4 Courts</button>
+                        </div>
+                    </div>
+
+                    <!-- Round Count (for Americano/Mexicano) -->
+                    <div class="form-group" id="padel-rounds-group">
+                        <label>Number of Rounds</label>
+                        <div class="sport-selector">
+                            <button class="sport-select-btn" data-rounds="3">3 Rounds</button>
+                            <button class="sport-select-btn active" data-rounds="5">5 Rounds</button>
+                            <button class="sport-select-btn" data-rounds="7">7 Rounds</button>
+                            <button class="sport-select-btn" data-rounds="0">Auto</button>
+                        </div>
+                    </div>
+
+                    <!-- Points per Game -->
+                    <div class="form-group" id="padel-points-group">
+                        <label>Points System</label>
+                        <div class="sport-selector">
+                            <button class="sport-select-btn active" data-points="normal">Normal (1pt per win)</button>
+                            <button class="sport-select-btn" data-points="bonus">Bonus (+1 for margin)</button>
+                            <button class="sport-select-btn" data-points="mexicano">Mexicano (+M bonus)</button>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary btn-lg btn-full" id="btn-start-padel">
+                        <i data-lucide="play"></i> Start Padel Session
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SCREEN: PADEL LIVE (Americano/Mexicano) ===== -->
+        <div id="screen-padel-live" class="main-screen hidden">
+            <div class="padel-live-container">
+                <!-- Session Header -->
+                <div class="padel-session-header">
+                    <div class="padel-session-info">
+                        <span class="badge badge-padel" id="padel-format-badge">Americano</span>
+                        <span class="padel-round-info" id="padel-round-info">Round 1/5</span>
+                    </div>
+                    <div class="padel-session-timer">
+                        <i data-lucide="clock"></i>
+                        <span id="padel-session-timer">00:00</span>
+                    </div>
+                </div>
+
+                <!-- Current Matchups -->
+                <div class="padel-matchups" id="padel-matchups">
+                    <!-- Dynamically populated -->
+                </div>
+
+                <!-- Leaderboard -->
+                <div class="padel-leaderboard" id="padel-leaderboard">
+                    <h4><i data-lucide="medal"></i> Standings</h4>
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Player</th>
+                                <th>W</th>
+                                <th>L</th>
+                                <th>Pts</th>
+                                <th>+/-</th>
+                            </tr>
+                        </thead>
+                        <tbody id="padel-leaderboard-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- Actions -->
+                <div class="padel-actions">
+                    <button class="btn btn-primary" id="btn-padel-next-round">
+                        <i data-lucide="arrow-right"></i> Next Round
+                    </button>
+                    <button class="btn btn-ghost" id="btn-padel-add-court">
+                        <i data-lucide="plus"></i> Add Court
+                    </button>
+                    <button class="btn btn-danger btn-sm" id="btn-padel-end-session">
+                        <i data-lucide="flag"></i> End Session
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== PADEL LIVE SCORE MODAL ===== -->
+        <div id="modal-padel-score" class="modal-overlay hidden">
+            <div class="modal-card modal-lg">
+                <div class="modal-header">
+                    <h3>Enter Score</h3>
+                    <button class="btn-icon modal-close" id="close-modal-padel-score"><i data-lucide="x"></i></button>
+                </div>
+                <div class="padel-score-form">
+                    <div class="padel-score-teams">
+                        <div class="padel-score-team" id="padel-score-team1">
+                            <div class="padel-score-team-name" id="padel-score-team1-name">Team 1</div>
+                            <input type="number" id="padel-score-team1-input" min="0" max="99" value="0" class="padel-score-input">
+                        </div>
+                        <div class="padel-score-vs">VS</div>
+                        <div class="padel-score-team" id="padel-score-team2">
+                            <div class="padel-score-team-name" id="padel-score-team2-name">Team 2</div>
+                            <input type="number" id="padel-score-team2-input" min="0" max="99" value="0" class="padel-score-input">
+                        </div>
+                    </div>
+                    <div class="padel-score-meta">
+                        <div class="form-group">
+                            <label>Court</label>
+                            <select id="padel-score-court">
+                                <option value="1">Court 1</option>
+                                <option value="2">Court 2</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-full" id="btn-padel-submit-score">
+                        <i data-lucide="check"></i> Submit Score
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== PADEL SESSION SUMMARY ===== -->
+        <div id="padel-summary-overlay" class="overlay hidden">
+            <div class="overlay-card padel-summary-card">
+                <div class="trophy-icon"><i data-lucide="trophy"></i></div>
+                <h2>Session Complete!</h2>
+                <div class="padel-summary-winner" id="padel-summary-winner"></div>
+                <div class="padel-summary-leaderboard" id="padel-summary-leaderboard"></div>
+                <div class="padel-summary-stats" id="padel-summary-stats"></div>
+                <div class="overlay-actions">
+                    <button class="btn btn-primary" id="btn-share-padel">
+                        <i data-lucide="share-2"></i> Share Results
+                    </button>
+                    <button class="btn btn-ghost" id="btn-padel-summary-close">
+                        <i data-lucide="home"></i> Home
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- ===== SCREEN: GROUP PLAY SETUP ===== -->
         <div id="screen-group-setup" class="main-screen hidden">
             <div class="setup-container">
@@ -1115,6 +1320,7 @@
                 </div>
                 <div class="history-tabs">
                     <button class="tab-btn active" data-history-tab="matches">Matches</button>
+                    <button class="tab-btn" data-history-tab="padel-sessions">Padel</button>
                     <button class="tab-btn" data-history-tab="tournaments">Tournaments</button>
                     <button class="tab-btn" data-history-tab="group-sessions">Group Sessions</button>
                 </div>
@@ -1123,6 +1329,7 @@
                     <input type="text" id="search-history" placeholder="Search history...">
                 </div>
                 <div id="history-matches" class="history-list"></div>
+                <div id="history-padel-sessions" class="history-list hidden"></div>
                 <div id="history-tournaments" class="history-list hidden"></div>
                 <div id="history-group-sessions" class="history-list hidden"></div>
             </div>
@@ -1307,31 +1514,98 @@
     <div class="quick-action-popup" id="quick-action-popup" style="display:none">
         <div class="qap-header">
             <span class="qap-title">New Match</span>
-            <span class="qap-subtitle">Choose match type</span>
+            <span class="qap-subtitle">Choose sport</span>
         </div>
-        <div class="qap-options">                <button class="qap-option" data-action="match-setup" data-mode="single">
-                    <div class="qap-icon"><i data-lucide="circle-dot"></i></div>
-                <div class="qap-label">Single</div>
-                <div class="qap-desc">1 vs 1</div>
-            </button>                <button class="qap-option" data-action="match-setup" data-mode="double">
-                    <div class="qap-icon"><i data-lucide="disc"></i></div>
-                <div class="qap-label">Double</div>
-                <div class="qap-desc">2 vs 2</div>
-            </button>                <button class="qap-option" data-action="group-setup">
-                    <div class="qap-icon"><i data-lucide="users"></i></div>
-                <div class="qap-label">Group</div>
-                <div class="qap-desc">Round robin</div>
-            </button>                <button class="qap-option" data-action="tournament-setup">
-                    <div class="qap-icon"><i data-lucide="trophy"></i></div>
-                <div class="qap-label">Tournament</div>
-                <div class="qap-desc">Bracket play</div>
+        <div class="qap-options">
+            <button class="qap-option qap-sport-btn" data-sport="padel">
+                <div class="qap-icon"><i data-lucide="disc"></i></div>
+                <div class="qap-label">Padel</div>
+                <div class="qap-desc">Americano, KOTH & more</div>
             </button>
+            <button class="qap-option qap-sport-btn" data-sport="tennis">
+                <div class="qap-icon"><i data-lucide="circle-dot"></i></div>
+                <div class="qap-label">Tennis</div>
+                <div class="qap-desc">Singles & Doubles</div>
+            </button>
+        </div>
+        <!-- Padel Sub-menu -->
+        <div class="qap-submenu" id="qap-padel-menu" style="display:none">
+            <div class="qap-header">
+                <button class="qap-back-btn" id="qap-padel-back"><i data-lucide="arrow-left"></i></button>
+                <span class="qap-title">Padel Formats</span>
+            </div>
+            <div class="qap-options">
+                <button class="qap-option" data-action="padel-americano">
+                    <div class="qap-icon"><i data-lucide="users"></i></div>
+                    <div class="qap-label">Americano</div>
+                    <div class="qap-desc">Round-robin rotation</div>
+                </button>
+                <button class="qap-option" data-action="padel-mexicano">
+                    <div class="qap-icon"><i data-lucide="shuffle"></i></div>
+                    <div class="qap-label">Mexicano</div>
+                    <div class="qap-desc">Americano + bonus points</div>
+                </button>
+                <button class="qap-option" data-action="padel-koth">
+                    <div class="qap-icon"><i data-lucide="crown"></i></div>
+                    <div class="qap-label">King of the Hill</div>
+                    <div class="qap-desc">Winner stays on court</div>
+                </button>
+                <button class="qap-option" data-action="padel-team-americano">
+                    <div class="qap-icon"><i data-lucide="shield"></i></div>
+                    <div class="qap-label">Team Americano</div>
+                    <div class="qap-desc">Team-based rotation</div>
+                </button>
+                <button class="qap-option" data-action="padel-knockout">
+                    <div class="qap-icon"><i data-lucide="trophy"></i></div>
+                    <div class="qap-label">Knockout</div>
+                    <div class="qap-desc">Single elimination bracket</div>
+                </button>
+                <button class="qap-option" data-action="padel-group-stage">
+                    <div class="qap-icon"><i data-lucide="layout-grid"></i></div>
+                    <div class="qap-label">Group Stage</div>
+                    <div class="qap-desc">Groups → Knockout</div>
+                </button>
+                <button class="qap-option" data-action="padel-custom">
+                    <div class="qap-icon"><i data-lucide="settings"></i></div>
+                    <div class="qap-label">Custom</div>
+                    <div class="qap-desc">Build your own format</div>
+                </button>
+            </div>
+        </div>
+        <!-- Tennis Sub-menu -->
+        <div class="qap-submenu" id="qap-tennis-menu" style="display:none">
+            <div class="qap-header">
+                <button class="qap-back-btn" id="qap-tennis-back"><i data-lucide="arrow-left"></i></button>
+                <span class="qap-title">Tennis</span>
+            </div>
+            <div class="qap-options">
+                <button class="qap-option" data-action="match-setup" data-mode="singles">
+                    <div class="qap-icon"><i data-lucide="circle-dot"></i></div>
+                    <div class="qap-label">Singles</div>
+                    <div class="qap-desc">1 vs 1</div>
+                </button>
+                <button class="qap-option" data-action="match-setup" data-mode="doubles">
+                    <div class="qap-icon"><i data-lucide="disc"></i></div>
+                    <div class="qap-label">Doubles</div>
+                    <div class="qap-desc">2 vs 2</div>
+                </button>
+                <button class="qap-option" data-action="group-setup">
+                    <div class="qap-icon"><i data-lucide="users"></i></div>
+                    <div class="qap-label">Group Play</div>
+                    <div class="qap-desc">King of the court</div>
+                </button>
+                <button class="qap-option" data-action="tournament-setup">
+                    <div class="qap-icon"><i data-lucide="trophy"></i></div>
+                    <div class="qap-label">Tournament</div>
+                    <div class="qap-desc">Bracket competition</div>
+                </button>
+            </div>
         </div>
     </div>
     <button class="quick-action-btn" id="quick-action-btn">
         <i data-lucide="plus"></i>
     </button>
 
-    <script src="app.js"></script>
+    <script src="app.js?v=4"></script>
 </body>
 </html>

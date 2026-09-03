@@ -2249,6 +2249,250 @@ input::placeholder, textarea::placeholder {
     font-style: italic;
 }
 
+/* ===== PADEL FORMAT GRID ===== */
+.padel-format-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.padel-format-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 16px 8px;
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-secondary);
+    font-family: var(--font);
+    cursor: pointer;
+    transition: all var(--transition);
+    text-align: center;
+}
+
+.padel-format-card:hover { border-color: var(--accent); color: var(--text-primary); }
+.padel-format-card.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+.padel-format-icon { font-size: 1.5rem; display: flex; align-items: center; justify-content: center; }
+.padel-format-icon svg { width: 28px; height: 28px; }
+.padel-format-name { font-weight: 700; font-size: 0.85rem; }
+.padel-format-desc { font-size: 0.7rem; color: var(--text-muted); }
+
+/* ===== PADEL LIVE ===== */
+.padel-live-container {
+    padding: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.padel-session-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.padel-session-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.padel-round-info {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.padel-session-timer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.padel-session-timer svg { width: 16px; height: 16px; }
+
+.padel-matchups {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.padel-matchup-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.padel-matchup-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+
+.padel-matchup-court {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.padel-matchup-teams {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.padel-matchup-team {
+    flex: 1;
+    text-align: center;
+}
+
+.padel-matchup-team-name {
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.padel-matchup-team-players {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.padel-matchup-vs {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
+.padel-matchup-score {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.padel-matchup-score.completed { color: var(--accent); }
+
+.padel-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+.padel-actions .btn { flex: 1; min-width: 0; }
+
+/* ===== PADEL SCORE MODAL ===== */
+.padel-score-form { padding: 0 20px 20px; }
+
+.padel-score-teams {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 16px 0;
+}
+
+.padel-score-team {
+    flex: 1;
+    text-align: center;
+}
+
+.padel-score-team-name {
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.padel-score-input {
+    width: 80px;
+    padding: 12px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: var(--bg-input);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    font-family: var(--font);
+}
+
+.padel-score-input:focus { border-color: var(--accent); outline: none; }
+
+.padel-score-vs {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.padel-score-meta { margin: 12px 0; }
+
+/* ===== PADEL SUMMARY ===== */
+.padel-summary-card {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.padel-summary-winner {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--accent);
+    margin: 12px 0;
+}
+
+.padel-summary-leaderboard { margin: 16px 0; }
+.padel-summary-stats { margin: 16px 0; font-size: 0.85rem; color: var(--text-muted); }
+
+.badge-padel {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* ===== QAP SUBMENU ===== */
+.qap-submenu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-secondary);
+    border-radius: 20px;
+    padding: 16px;
+    overflow-y: auto;
+    z-index: 1;
+}
+
+.qap-back-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+}
+
+.qap-back-btn svg { width: 20px; height: 20px; }
+
 /* ===== GROUP PLAY TIME CONFIG ===== */
 .gp-time-row {
     display: flex;
@@ -3071,7 +3315,7 @@ input[type="color"] {
     pointer-events: none;
     transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
     box-shadow: 0 16px 48px rgba(0,0,0,0.4);
-    overflow: hidden;
+    overflow: visible;
 }
 
 .quick-action-popup.visible {
