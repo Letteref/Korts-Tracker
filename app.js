@@ -374,6 +374,11 @@ const Router = {
             this.showMatchWarning();
             return;
         }
+        // Redirect padel format actions to padel-setup with format pre-selected
+        if (screen.startsWith('padel-') && screen !== 'padel-setup' && screen !== 'padel-live') {
+            opts.format = screen.replace('padel-', '');
+            screen = 'padel-setup';
+        }
         if (this.currentScreen) this.history.push(this.currentScreen);
         this.showScreen(screen, opts);
     },
@@ -467,7 +472,7 @@ const Router = {
             case 'match': UI.renderMatch(); break;
             case 'tournament-setup': UI.renderTournamentSetup(); break;
             case 'tournament': UI.renderTournamentBracket(); break;
-            case 'padel-setup': UI.renderPadelSetup(); break;
+            case 'padel-setup': UI.renderPadelSetup(opts.format); break;
             case 'padel-live': UI.renderPadelLive(); break;
             case 'group-setup': UI.renderGroupSetup(); break;
             case 'group': UI.renderGroupPlay(); break;
@@ -3230,7 +3235,7 @@ const UI = {
     },
 
     // ===== PADEL =====
-    renderPadelSetup() {
+    renderPadelSetup(preselectedFormat) {
         const players = Store.getPlayers();
         const grid = document.getElementById('padel-player-grid');
         grid.innerHTML = players.map(p => `
@@ -3239,6 +3244,12 @@ const UI = {
                 <span>${Utils.escapeHtml(p.name)}</span>
             </div>
         `).join('');
+        // Pre-select format if coming from FAB submenu
+        if (preselectedFormat) {
+            document.querySelectorAll('[data-padel-format]').forEach(c => c.classList.remove('active'));
+            const target = document.querySelector(`[data-padel-format="${preselectedFormat}"]`);
+            if (target) target.classList.add('active');
+        }
         this.updatePadelPlayerCount();
         this.updatePadelFormatSettings();
         lucide.createIcons();
